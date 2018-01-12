@@ -3,7 +3,7 @@
 # Copyright 2012 Vassil Panayotov
 # Apache 2.0
 
-data=/home/liang/work/voice/corpus/voxforge/selected
+data=${DATA_ROOT}/selected
 
 echo "=== Preparing train and test data ..."
 srcdir=$data/local

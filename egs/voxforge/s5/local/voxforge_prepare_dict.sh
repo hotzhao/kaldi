@@ -5,7 +5,7 @@
 
 locdata=$DATA_ROOT/selected/local
 locdict=$locdata/dict
-cmudict=~/work/voice/tools/cumdict
+cmudict=$DATA_ROOT/../../tools/cumdict
 
 echo "=== Preparing the dictionary ..."
 
