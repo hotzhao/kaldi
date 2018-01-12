@@ -21,7 +21,7 @@
 
 # The number of parallel jobs to be started for some parts of the recipe
 # Make sure you have enough resources(CPUs and RAM) to accomodate this number of jobs
-njobs=2
+njobs=6
 
 # This recipe can select subsets of VoxForge's data based on the "Pronunciation dialect"
 # field in VF's etc/README files. To select all dialects, set this to "English"
@@ -64,9 +64,11 @@ local/voxforge_prepare_lm.sh --order ${lm_order} || exit 1
 # Pronunciations for OOV words are obtained using a pre-trained Sequitur model
 local/voxforge_prepare_dict.sh || exit 1
 
+data=$DATA_ROOT/selected
+
 # Prepare data/lang and data/local/lang directories
 utils/prepare_lang.sh --position-dependent-phones $pos_dep_phones \
-  data/local/dict '!SIL' data/local/lang data/lang || exit 1
+  $data/local/dict '!SIL' $data/local/lang $data/lang || exit 1
 
 # Prepare G.fst and data/{train,test} directories
 local/voxforge_format_data.sh || exit 1
@@ -80,6 +82,9 @@ for x in train test; do
    data/$x exp/make_mfcc/$x $mfccdir || exit 1;
  steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir || exit 1;
 done
+
+echo "LZ: stop here for debugging"
+exit 1
 
 # Train monophone models on a subset of the data
 utils/subset_data_dir.sh data/train 1000 data/train.1k  || exit 1;

@@ -109,10 +109,13 @@ mkdir -p $dir $tmpdir $dir/phones
 silprob=false
 [ -f $srcdir/lexiconp_silprob.txt ] && silprob=true
 
-[ -f path.sh ] && . ./path.sh
+#lz: no point to re-run it
+#[ -f path.sh ] && . ./path.sh
 
+echo "=== Validating srcdir=$srcdir ..."
 ! utils/validate_dict_dir.pl $srcdir && \
   echo "*Error validating directory $srcdir*" && exit 1;
+echo "*** Validating srcdir finished! "
 
 if [[ ! -f $srcdir/lexicon.txt ]]; then
   echo "**Creating $dir/lexicon.txt from $dir/lexiconp.txt"
@@ -123,6 +126,7 @@ if [[ ! -f $srcdir/lexiconp.txt ]]; then
   perl -ape 's/(\S+\s+)(.+)/${1}1.0\t$2/;' < $srcdir/lexicon.txt > $srcdir/lexiconp.txt || exit 1;
 fi
 
+echo "unk_fst=$unk_fst"
 if [ ! -z "$unk_fst" ] && [ ! -f "$unk_fst" ]; then
   echo "$0: expected --unk-fst $unk_fst to exist as a file"
   exit 1
@@ -134,6 +138,7 @@ if ! utils/validate_dict_dir.pl $srcdir >&/dev/null; then
   exit 1;
 fi
 
+echo "phone_symbol_table=$phone_symbol_table"
 # phones.txt file provided, we will do some sanity check here.
 if [[ ! -z $phone_symbol_table ]]; then
   # Checks if we have position dependent phones
@@ -151,6 +156,7 @@ if [[ ! -z $phone_symbol_table ]]; then
       print "Phone appears in the lexicon but not in the provided phones.txt: "$x; exit 1; }}}' || exit 1;
 fi
 
+echo "extra_word_disambig_syms=$extra_word_disambig_syms"
 # In case there are extra word-level disambiguation symbols we need
 # to make sure that all symbols in the provided file are valid.
 if [ ! -z "$extra_word_disambig_syms" ]; then
@@ -160,12 +166,14 @@ if [ ! -z "$extra_word_disambig_syms" ]; then
   fi
 fi
 
+echo "position_dependent_phones=$position_dependent_phones"
 if $position_dependent_phones; then
   # Create $tmpdir/lexiconp.txt from $srcdir/lexiconp.txt (or
   # $tmpdir/lexiconp_silprob.txt from $srcdir/lexiconp_silprob.txt) by
   # adding the markers _B, _E, _S, _I depending on word position.
   # In this recipe, these markers apply to silence also.
   # Do this starting from lexiconp.txt only.
+  echo "  silprob=$silprob"
   if "$silprob"; then
     perl -ane '@A=split(" ",$_); $w = shift @A; $p = shift @A; $silword_p = shift @A;
               $wordsil_f = shift @A; $wordnonsil_f = shift @A; @A>0||die;
@@ -174,6 +182,7 @@ if $position_dependent_phones; then
          for($n=1;$n<@A-1;$n++) { print "$A[$n]_I "; } print "$A[$n]_E\n"; } ' \
                 < $srcdir/lexiconp_silprob.txt > $tmpdir/lexiconp_silprob.txt
   else
+    echo "  adding _B, _E, _S, _I in $tmpdir/lexiconp.txt"
     perl -ane '@A=split(" ",$_); $w = shift @A; $p = shift @A; @A>0||die;
          if(@A==1) { print "$w $p $A[0]_S\n"; } else { print "$w $p $A[0]_B ";
          for($n=1;$n<@A-1;$n++) { print "$A[$n]_I "; } print "$A[$n]_E\n"; } ' \
@@ -194,6 +203,7 @@ if $position_dependent_phones; then
 
   # This phone map expands the phone lists into all the word-position-dependent
   # versions of the phone lists.
+  echo "  creating $tmpdir/phone_map.txt..."
   cat <(set -f; for x in `cat $srcdir/silence_phones.txt`; do for y in "" "" "_B" "_E" "_I" "_S"; do echo -n "$x$y "; done; echo; done) \
     <(set -f; for x in `cat $srcdir/nonsilence_phones.txt`; do for y in "" "_B" "_E" "_I" "_S"; do echo -n "$x$y "; done; echo; done) \
     > $tmpdir/phone_map.txt
@@ -209,10 +219,12 @@ else
   paste -d' ' $tmpdir/phones $tmpdir/phones > $tmpdir/phone_map.txt
 fi
 
+echo "mkdir $dir/phones"
 mkdir -p $dir/phones  # various sets of phones...
 
 # Sets of phones for use in clustering, and making monophone systems.
 
+echo "share_silence_phones=$share_silence_phones"
 if $share_silence_phones; then
   # build a roots file that will force all the silence phones to share the
   # same pdf's. [three distinct states, only the transitions will differ.]
@@ -232,25 +244,36 @@ else
   # different silence phones will have different GMMs.  [note: here, all "shared split" means
   # is that we may have one GMM for all the states, or we can split on states.  because they're
   # context-independent phones, they don't see the context.]
+  echo "Generating $dir/phones/sets.txt..."
   cat $srcdir/{,non}silence_phones.txt | utils/apply_map.pl $tmpdir/phone_map.txt > $dir/phones/sets.txt
+  echo "Generating $dir/phones/roots.txt..."
   cat $dir/phones/sets.txt | awk '{print "shared", "split", $0;}' > $dir/phones/roots.txt
 fi
 
+echo "Generating $dir/phones/silence.txt..."
 cat $srcdir/silence_phones.txt | utils/apply_map.pl $tmpdir/phone_map.txt | \
   awk '{for(n=1;n<=NF;n++) print $n;}' > $dir/phones/silence.txt
+echo "Generating $dir/phones/nonsilence.txt..."
 cat $srcdir/nonsilence_phones.txt | utils/apply_map.pl $tmpdir/phone_map.txt | \
   awk '{for(n=1;n<=NF;n++) print $n;}' > $dir/phones/nonsilence.txt
+  
+set -x
 cp $srcdir/optional_silence.txt $dir/phones/optional_silence.txt
 cp $dir/phones/silence.txt $dir/phones/context_indep.txt
+set +x
 
+echo "Generating $dir/phones/extra_questions.txt..."
 # if extra_questions.txt is empty, it's OK.
 cat $srcdir/extra_questions.txt 2>/dev/null | utils/apply_map.pl $tmpdir/phone_map.txt \
   >$dir/phones/extra_questions.txt
+  
 
+echo "position_dependent_phones=$position_dependent_phones"
 # Want extra questions about the word-start/word-end stuff. Make it separate for
 # silence and non-silence. Probably doesn't matter, as silence will rarely
 # be inside a word.
 if $position_dependent_phones; then
+  echo "Appending $dir/phones/extra_questions.txt..."
   for suffix in _B _E _I _S; do
     (set -f; for x in `cat $srcdir/nonsilence_phones.txt`; do echo -n "$x$suffix "; done; echo) >>$dir/phones/extra_questions.txt
   done
@@ -259,6 +282,7 @@ if $position_dependent_phones; then
   done
 fi
 
+echo "unk_fst=$unk_fst"
 # add_lex_disambig.pl is responsible for adding disambiguation symbols to
 # the lexicon, for telling us how many disambiguation symbols it used,
 # and and also for modifying the unknown-word's pronunciation (if the
@@ -282,12 +306,15 @@ else
   unk_opt=
 fi
 
+echo "silprob=$silprob"
 if "$silprob"; then
   ndisambig=$(utils/add_lex_disambig.pl $unk_opt --pron-probs --sil-probs $tmpdir/lexiconp_silprob.txt $tmpdir/lexiconp_silprob_disambig.txt)
 else
+  echo "  Generating $tmpdir/lexiconp_disambig.txt..."
   ndisambig=$(utils/add_lex_disambig.pl $unk_opt --pron-probs $tmpdir/lexiconp.txt $tmpdir/lexiconp_disambig.txt)
 fi
 ndisambig=$[$ndisambig+$num_extra_phone_disambig_syms]; # add (at least) one disambig symbol for silence in lexicon FST.
+echo "Generating $tmpdir/lex_ndisambig..."
 echo $ndisambig > $tmpdir/lex_ndisambig
 
 # Format of lexiconp_disambig.txt:
@@ -297,8 +324,10 @@ echo $ndisambig > $tmpdir/lex_ndisambig
 # <NOISE>	1.0  NSN_S
 # !EXCLAMATION-POINT	1.0  EH2_B K_I S_I K_I L_I AH0_I M_I EY1_I SH_I AH0_I N_I P_I OY2_I N_I T_E
 
+echo "Generating $dir/phones/disambig.txt..."
 ( for n in `seq 0 $ndisambig`; do echo '#'$n; done ) >$dir/phones/disambig.txt
 
+echo "extra_word_disambig_syms=$extra_word_disambig_syms"
 # In case there are extra word-level disambiguation symbols they also
 # need to be added to the list of phone-level disambiguation symbols.
 if [ ! -z "$extra_word_disambig_syms" ]; then
@@ -306,6 +335,7 @@ if [ ! -z "$extra_word_disambig_syms" ]; then
   cat $extra_word_disambig_syms | awk '{ print $1 }' >> $dir/phones/disambig.txt
 fi
 
+echo "phone_symbol_table=$phone_symbol_table"
 # Create phone symbol table.
 if [[ ! -z $phone_symbol_table ]]; then
   start_symbol=`grep \#0 $phone_symbol_table | awk '{print $2}'`
@@ -313,13 +343,16 @@ if [[ ! -z $phone_symbol_table ]]; then
   BEGIN { while ((getline < f) > 0) { phones[$1] = $2; }} { print $1" "phones[$1]; }' | sort -k2 -g |\
     cat - <(cat $dir/phones/disambig.txt | awk -v x=$start_symbol '{n=x+NR-1; print $1, n;}') > $dir/phones.txt
 else
+  echo "Generating $dir/phones.txt..."
   echo "<eps>" | cat - $dir/phones/{silence,nonsilence,disambig}.txt | \
     awk '{n=NR-1; print $1, n;}' > $dir/phones.txt
 fi
 
+echo "position_dependent_phones=$position_dependent_phones"
 # Create a file that describes the word-boundary information for
 # each phone.  5 categories.
 if $position_dependent_phones; then
+  echo "Generating $dir/phones/word_boundary.txt..."
   cat $dir/phones/{silence,nonsilence}.txt | \
     awk '/_I$/{print $1, "internal"; next;} /_B$/{print $1, "begin"; next; }
          /_S$/{print $1, "singleton"; next;} /_E$/{print $1, "end"; next; }
@@ -334,6 +367,7 @@ fi
 # ConstArpaLm format language model. They do not normally appear in G.fst or
 # L.fst.
 
+echo "silprob=$silprob"
 if "$silprob"; then
   # remove the silprob
   cat $tmpdir/lexiconp_silprob.txt |\
@@ -344,6 +378,7 @@ if "$silprob"; then
     }' > $tmpdir/lexiconp.txt
 fi
 
+echo "Generating $dir/words.txt..."
 cat $tmpdir/lexiconp.txt | awk '{print $1}' | sort | uniq  | awk '
   BEGIN {
     print "<eps> 0";
@@ -365,6 +400,8 @@ cat $tmpdir/lexiconp.txt | awk '{print $1}' | sort | uniq  | awk '
     printf("</s> %d\n", NR+3);
   }' > $dir/words.txt || exit 1;
 
+  
+echo "extra_word_disambig_syms=$extra_word_disambig_syms"
 # In case there are extra word-level disambiguation symbols they also
 # need to be added to words.txt
 if [ ! -z "$extra_word_disambig_syms" ]; then
@@ -386,6 +423,7 @@ fi
 #...
 
 silphone=`cat $srcdir/optional_silence.txt` || exit 1;
+echo "silphone=$silphone"
 [ -z "$silphone" ] && \
   ( echo "You have no optional-silence phone; it is required in the current scripts"
     echo "but you may use the option --sil-prob 0.0 to stop it being used." ) && \
@@ -395,16 +433,21 @@ silphone=`cat $srcdir/optional_silence.txt` || exit 1;
 # This is the method we use for lattice word alignment if we are not
 # using word-position-dependent phones.
 
+echo "Generating $tmpdir/align_lexicon.txt..."
 # First remove pron-probs from the lexicon.
 perl -ape 's/(\S+\s+)\S+\s+(.+)/$1$2/;' <$tmpdir/lexiconp.txt >$tmpdir/align_lexicon.txt
 
+echo "silphone=$silphone"
+echo "  Appending $tmpdir/align_lexicon.txt..."
 # Note: here, $silphone will have no suffix e.g. _S because it occurs as optional-silence,
 # and is not part of a word.
 [ ! -z "$silphone" ] && echo "<eps> $silphone" >> $tmpdir/align_lexicon.txt
 
+echo "Generating $dir/phones/align_lexicon.txt..."
 cat $tmpdir/align_lexicon.txt | \
  perl -ane '@A = split; print $A[0], " ", join(" ", @A), "\n";' | sort | uniq > $dir/phones/align_lexicon.txt
 
+echo "Generating $dir/phones/align_lexicon.int..."
 # create phones/align_lexicon.int
 cat $dir/phones/align_lexicon.txt | utils/sym2int.pl -f 3- $dir/phones.txt | \
   utils/sym2int.pl -f 1-2 $dir/words.txt > $dir/phones/align_lexicon.int
@@ -412,6 +455,7 @@ cat $dir/phones/align_lexicon.txt | utils/sym2int.pl -f 3- $dir/phones.txt | \
 # Create the basic L.fst without disambiguation symbols, for use
 # in training.
 
+echo "silprob=$silprob"
 if $silprob; then
   # Add silence probabilities (modlels the prob. of silence before and after each
   # word).  On some setups this helps a bit.  See utils/dict_dir_add_pronprobs.sh
@@ -421,6 +465,7 @@ if $silprob; then
      --keep_isymbols=false --keep_osymbols=false |   \
      fstarcsort --sort_type=olabel > $dir/L.fst || exit 1;
 else
+  echo "Generating $dir/L.fst..."
   utils/make_lexicon_fst.pl --pron-probs $tmpdir/lexiconp.txt $sil_prob $silphone | \
     fstcompile --isymbols=$dir/phones.txt --osymbols=$dir/words.txt \
     --keep_isymbols=false --keep_osymbols=false | \
@@ -429,7 +474,9 @@ fi
 
 # The file oov.txt contains a word that we will map any OOVs to during
 # training.
+echo "Generating $dir/oov.txt..."
 echo "$oov_word" > $dir/oov.txt || exit 1;
+echo "Generating $dir/oov.int..."
 cat $dir/oov.txt | utils/sym2int.pl $dir/words.txt >$dir/oov.int || exit 1;
 # integer version of oov symbol, used in some scripts.
 
@@ -441,8 +488,10 @@ cat $dir/oov.txt | utils/sym2int.pl $dir/words.txt >$dir/oov.int || exit 1;
 # wdisambig_words.int contains the corresponding list interpreted by the
 # symbol table words.txt, and wdisambig_phones.int contains the corresponding
 # list interpreted by the symbol table phones.txt.
+echo "Generating $dir/phones/wdisambig.txt..."
 echo '#0' >$dir/phones/wdisambig.txt
 
+echo "extra_word_disambig_syms=$extra_word_disambig_syms"
 # In case there are extra word-level disambiguation symbols they need
 # to be added to the existing word-level disambiguation symbols file.
 if [ ! -z "$extra_word_disambig_syms" ]; then
@@ -451,7 +500,9 @@ if [ ! -z "$extra_word_disambig_syms" ]; then
   cat $extra_word_disambig_syms | awk '{ print $1 }' >> $dir/phones/wdisambig.txt
 fi
 
+echo "Generating $dir/phones/wdisambig_phones.int..."
 utils/sym2int.pl $dir/phones.txt <$dir/phones/wdisambig.txt >$dir/phones/wdisambig_phones.int
+echo "Generating $dir/phones/wdisambig_words.int..."
 utils/sym2int.pl $dir/words.txt <$dir/phones/wdisambig.txt >$dir/phones/wdisambig_words.int
 
 # Create these lists of phones in colon-separated integer list form too,
@@ -460,16 +511,20 @@ for f in silence nonsilence optional_silence disambig context_indep; do
   utils/sym2int.pl $dir/phones.txt <$dir/phones/$f.txt >$dir/phones/$f.int
   utils/sym2int.pl $dir/phones.txt <$dir/phones/$f.txt | \
    awk '{printf(":%d", $1);} END{printf "\n"}' | sed s/:// > $dir/phones/$f.csl || exit 1;
+  echo "Generating $dir/phones/$f.csl..."
 done
 
 for x in sets extra_questions; do
   utils/sym2int.pl $dir/phones.txt <$dir/phones/$x.txt > $dir/phones/$x.int || exit 1;
+  echo "Generating $dir/phones/$x.int..."
 done
 
+echo "Generating $dir/phones/roots.int..."
 utils/sym2int.pl -f 3- $dir/phones.txt <$dir/phones/roots.txt \
    > $dir/phones/roots.int || exit 1;
 
 if [ -f $dir/phones/word_boundary.txt ]; then
+  echo "Generating $dir/phones/word_boundary.int..."
   utils/sym2int.pl -f 1 $dir/phones.txt <$dir/phones/word_boundary.txt \
     > $dir/phones/word_boundary.int || exit 1;
 fi
@@ -482,6 +537,7 @@ nonsilphonelist=`cat $dir/phones/nonsilence.csl`
 # utils/gen_topo.pl.  We do this in the 'chain' recipes.  Of course, the 'topo' file
 # should cover all the phones.  Try running utils/validate_lang.pl to check that
 # everything is OK after modifying the topo file.
+echo "Generating $dir/topo..."
 utils/gen_topo.pl $num_nonsil_states $num_sil_states $nonsilphonelist $silphonelist >$dir/topo
 
 
@@ -489,6 +545,7 @@ utils/gen_topo.pl $num_nonsil_states $num_sil_states $nonsilphonelist $silphonel
 # There is an extra step where we create a loop to "pass through" the
 # disambiguation symbols from G.fst.
 
+echo "silprob=$silprob"
 if $silprob; then
   utils/make_lexicon_fst_silprob.pl $tmpdir/lexiconp_silprob_disambig.txt $srcdir/silprob.txt $silphone '#'$ndisambig | \
      fstcompile --isymbols=$dir/phones.txt --osymbols=$dir/words.txt \
@@ -501,9 +558,10 @@ else
      --keep_isymbols=false --keep_osymbols=false |   \
      fstaddselfloops  $dir/phones/wdisambig_phones.int $dir/phones/wdisambig_words.int | \
      fstarcsort --sort_type=olabel > $dir/L_disambig.fst || exit 1;
+  echo "Generating $dir/L_disambig.fst..."
 fi
 
-
+echo "unk_fst=$unk_fst"
 if [ ! -z "$unk_fst" ]; then
   utils/lang/internal/apply_unk_lm.sh $unk_fst $dir || exit 1
 

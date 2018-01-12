@@ -6,8 +6,6 @@
 
 # Makes train/test splits
 
-source path.sh
-
 echo "=== Starting initial VoxForge data preparation ..."
 
 echo "--- Making test/train data split ..."
@@ -27,7 +25,7 @@ command -v flac >/dev/null 2>&1 ||\
 
 DATA=$1
 
-locdata=data/local
+locdata=$DATA/local
 loctmp=$locdata/tmp
 rm -rf $loctmp >/dev/null 2>&1
 mkdir -p $locdata
@@ -36,8 +34,13 @@ mkdir -p $loctmp
 # names don't follow the "speaker-YYYYMMDD-<random_3letter_suffix>" convention.
 # The ";tx;d;:x" part of the expression is to filter out the directories,
 # not matched by the expression
+#find $DATA/ -mindepth 1 -maxdepth 1 |\
+# perl -ane ' s:.*/((.+)\-[0-9]{8,10}[a-z]*([_\-].*)?):$2: && print; ' | \
+#  sort -u > $loctmp/speakers_all.txt
+
+# lz: use something I can understand
 find $DATA/ -mindepth 1 -maxdepth 1 |\
- perl -ane ' s:.*/((.+)\-[0-9]{8,10}[a-z]*([_\-].*)?):$2: && print; ' | \
+ perl -ne ' /.*\/(.+)\-[0-9]{8,10}[a-z]*([_\-].*)?/ && print "$1\n" ' | \
   sort -u > $loctmp/speakers_all.txt
 
 nspk_all=$(wc -l <$loctmp/speakers_all.txt)
@@ -93,8 +96,12 @@ for s in test train; do
       echo "No README file for $d - skipping this directory ..."
       continue
     fi
-    spkgender=$(perl -ane ' s/.*gender\:\W*(.).*/lc($1)/ei && print; ' <$rdm)
-    if [ "$spkgender" != "f" -a "$spkgender" != "m" ]; then
+    # lz: I'd prefer this way
+    #spkgender=$(perl -ane ' s/.*gender\:\W*(.).*/lc($1)/ei && print; ' <$rdm)
+    spkgender=`perl -ne 'm/.*gender\:\W*(.).*/i && print lc($1)' < $rdm `
+    # lz: I'd prefer this way
+    if [ "$spkgender" != "f" ] && [ "$spkgender" != "m" ]; then
+    #if [ "$spkgender" != "f" -a "$spkgender" != "m" ]; then
       echo "Illegal or empty gender ($spkgender) for \"$d\" - assuming m(ale) ..."
       spkgender="m"
     fi
@@ -120,7 +127,7 @@ for s in test train; do
     all_utt2spk_entries=()
     for w in ${dir}/${wavtype}/*${wavtype}; do
       bw=`basename $w`
-      wavname=${bw%.$wavtype}
+      wavname=${bw%.$wavtype} #lz: quite tricky: delete .wav from back of $bw
       all_wavs+=("$wavname")
       id="${idpfx}-${wavname}"
       if [ ! -s $w ]; then

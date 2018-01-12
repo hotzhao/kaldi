@@ -45,6 +45,11 @@ fi
 # make $mfccdir an absolute pathname.
 mfccdir=`perl -e '($dir,$pwd)= @ARGV; if($dir!~m:^/:) { $dir = "$pwd/$dir"; } print $dir; ' $mfccdir ${PWD}`
 
+echo "=== Make MFCC..."
+echo "data=$data"
+echo "logdir=$logdir"
+echo "mfccdir=$mfccdir"
+
 # use "name" as part of name of the archive.
 name=`basename $data`
 
@@ -122,6 +127,10 @@ else
   # add ,p to the input rspecifier so that we can just skip over
   # utterances that have bad wave data.
 
+  # lz:
+  # compute-mfcc-feats
+  #     scp,p:xxx.scp      	// script, permissive: 	script file
+  #     ark:-				// archive:				standard output
   $cmd JOB=1:$nj $logdir/make_mfcc_${name}.JOB.log \
     compute-mfcc-feats  $vtln_opts --verbose=2 --config=$mfcc_config \
      scp,p:$logdir/wav_${name}.JOB.scp ark:- \| \

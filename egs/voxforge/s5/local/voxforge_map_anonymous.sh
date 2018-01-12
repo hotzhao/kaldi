@@ -13,7 +13,7 @@ if [ $# -ne 1 ]; then
 fi
 
 data=$1
-data_local=data/local
+data_local=$data/local
 
 if [ ! -d $data ]; then
   echo "\"$DATA\" is not a directory!"
@@ -21,6 +21,8 @@ if [ ! -d $data ]; then
 fi
 
 mkdir -p $data_local
+
+echo $data_local
 
 echo "--- Mapping the \"anonymous\" speakers to unique IDs ..."
 ls -d $data/anonymous-*-* |\

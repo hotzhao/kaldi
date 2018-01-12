@@ -1,39 +1,41 @@
 #!/bin/bash
 
-# Copyright 2012 Vassil Panayotov
-# Apache 2.0
+source path.sh
+source cmd.sh
 
-locdata=$DATA_ROOT/selected/local
+DATA=~/work/voice/corpus/voxforge/selected
+locdata=$DATA/local
+loctmp=$locdata/tmp
+logdir=exp/data_prep
+njobs=2
 locdict=$locdata/dict
-cmudict=~/work/voice/tools/cumdict
 
-echo "=== Preparing the dictionary ..."
-
-mkdir -p $locdict
-
-if [ ! -f $cmudict/cmudict.0.7a ]; then
+if [ ! -f $locdict/cmudict/cmudict.0.7a ]; then
   echo "--- Downloading CMU dictionary ..."
-  mkdir -p $cmudict
+  mkdir -p $locdict
   svn co http://svn.code.sf.net/p/cmusphinx/code/trunk/cmudict \
-    $cmudict || exit 1;
+    $locdict/cmudict || exit 1;
 fi
 
-echo "--- Striping stress and pronunciation variant markers from cmudict ..."
-perl $cmudict/scripts/make_baseform.pl \
-  $cmudict/cmudict.0.7a /dev/stdout |\
-  sed -e 's:^\([^\s(]\+\)([0-9]\+)\(\s\+\)\(.*\):\1\2\3:' > $locdict/cmudict-plain.txt
+if [ ! -f $locdict/cmudict-plain.txt ]; then
+  echo "--- Striping stress and pronunciation variant markers from cmudict ..."
+  perl $locdict/cmudict/scripts/make_baseform.pl \
+    $locdict/cmudict/cmudict.0.7a /dev/stdout |\
+    sed -e 's:^\([^\s(]\+\)([0-9]\+)\(\s\+\)\(.*\):\1\2\3:' > $locdict/cmudict-plain.txt
+fi
 
-#lz: get rid of <s> and </s>
-echo "--- Searching for OOV words ..."
-awk 'NR==FNR{words[$1]; next;} !($1 in words)' \
-  $locdict/cmudict-plain.txt $locdata/vocab-full.txt |\
-  egrep -v '<.?s>' > $locdict/vocab-oov.txt
+if [ ! -f $locdict/vocab-oov.txt ]; then
+  echo "--- Searching for OOV words ..."
+  awk 'NR==FNR{words[$1]; next;} !($1 in words)' \
+    $locdict/cmudict-plain.txt $locdata/vocab-full.txt |\
+    egrep -v '<.?s>' > $locdict/vocab-oov.txt
+fi
 
-#lz: lexicon-iv.txt > vocab-full.txt
-#    because one word may have multiple pronunciations
+if [ ! -f $locdict/lexicon-iv.txt ]; then
 awk 'NR==FNR{words[$1]; next;} ($1 in words)' \
   $locdata/vocab-full.txt $locdict/cmudict-plain.txt |\
   egrep -v '<.?s>' > $locdict/lexicon-iv.txt
+fi
 
 wc -l $locdict/vocab-oov.txt
 wc -l $locdict/lexicon-iv.txt
@@ -45,12 +47,6 @@ if [ ! -f conf/g2p_model ]; then
     echo "Failed to download the g2p model!"
     exit 1
   fi
-fi
-
-if [[ "$(uname)" == "Darwin" ]]; then
-  command -v greadlink >/dev/null 2>&1 || \
-    { echo "Mac OS X detected and 'greadlink' not found - please install using macports or homebrew"; exit 1; }
-  alias readlink=greadlink
 fi
 
 sequitur=$KALDI_ROOT/tools/sequitur
@@ -84,3 +80,12 @@ echo -e "!SIL\tSIL" >> $locdict/lexicon.txt
 touch $locdict/extra_questions.txt
 
 echo "*** Dictionary preparation finished!"
+
+
+
+
+
+
+
+
+
