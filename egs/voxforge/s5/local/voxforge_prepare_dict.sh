@@ -38,6 +38,9 @@ awk 'NR==FNR{words[$1]; next;} ($1 in words)' \
 wc -l $locdict/vocab-oov.txt
 wc -l $locdict/lexicon-iv.txt
 
+# lz:
+# Grapheme to phoneme model
+# For 'guessing' the pronunciation of the OOV words (out of vocabulary)
 if [ ! -f conf/g2p_model ]; then
   echo "--- Downloading a pre-trained Sequitur G2P model ..."
   wget http://sourceforge.net/projects/kaldi/files/sequitur-model4 -O conf/g2p_model
