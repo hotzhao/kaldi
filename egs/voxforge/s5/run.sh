@@ -78,17 +78,22 @@ local/voxforge_format_data.sh || exit 1
 # want to store MFCC features.
 mfccdir=${DATA_ROOT}/mfcc
 for x in train test; do 
+ # frame shift = 160 sample points  (10ms), in the input wav file
+ # frame length = 400 sample points (25ms)
+ # for each frame, we generate a feature vector (13 floats)
+ # these feature vectors will be compressed via 'copy-feats'
  steps/make_mfcc.sh --cmd "$train_cmd" --nj $njobs \
-   data/$x exp/make_mfcc/$x $mfccdir || exit 1;
- steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir || exit 1;
+   $data/$x exp/make_mfcc/$x $mfccdir || exit 1;
+ # compute cepstral mean and variance for each speaker
+ steps/compute_cmvn_stats.sh $data/$x exp/make_mfcc/$x $mfccdir || exit 1;
 done
+
+# Train monophone models on a subset of the data
+utils/subset_data_dir.sh $data/train 1000 $data/train.1k  || exit 1;
+steps/train_mono.sh --nj $njobs --cmd "$train_cmd" $data/train.1k $data/lang exp/mono  || exit 1;
 
 echo "LZ: stop here for debugging"
 exit 1
-
-# Train monophone models on a subset of the data
-utils/subset_data_dir.sh data/train 1000 data/train.1k  || exit 1;
-steps/train_mono.sh --nj $njobs --cmd "$train_cmd" data/train.1k data/lang exp/mono  || exit 1;
 
 # Monophone decoding
 utils/mkgraph.sh data/lang_test exp/mono exp/mono/graph || exit 1

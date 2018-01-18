@@ -130,7 +130,9 @@ else
   # lz:
   # compute-mfcc-feats
   #     scp,p:xxx.scp      	// script, permissive: 	script file
-  #     ark:-				// archive:				standard output
+  #     ark:-				        // archive:				standard output
+  # copy-feats
+  #     copy and compress the features with CompressedMatrixWriter
   $cmd JOB=1:$nj $logdir/make_mfcc_${name}.JOB.log \
     compute-mfcc-feats  $vtln_opts --verbose=2 --config=$mfcc_config \
      scp,p:$logdir/wav_${name}.JOB.scp ark:- \| \
