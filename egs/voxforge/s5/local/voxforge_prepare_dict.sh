@@ -23,13 +23,13 @@ perl $cmudict/scripts/make_baseform.pl \
   $cmudict/cmudict.0.7a /dev/stdout |\
   sed -e 's:^\([^\s(]\+\)([0-9]\+)\(\s\+\)\(.*\):\1\2\3:' > $locdict/cmudict-plain.txt
 
-#lz: get rid of <s> and </s>
+#LZ: get rid of <s> and </s>
 echo "--- Searching for OOV words ..."
 awk 'NR==FNR{words[$1]; next;} !($1 in words)' \
   $locdict/cmudict-plain.txt $locdata/vocab-full.txt |\
   egrep -v '<.?s>' > $locdict/vocab-oov.txt
 
-#lz: lexicon-iv.txt > vocab-full.txt
+#LZ: lexicon-iv.txt > vocab-full.txt
 #    because one word may have multiple pronunciations
 awk 'NR==FNR{words[$1]; next;} ($1 in words)' \
   $locdata/vocab-full.txt $locdict/cmudict-plain.txt |\

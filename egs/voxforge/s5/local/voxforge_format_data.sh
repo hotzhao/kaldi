@@ -35,7 +35,7 @@ for f in phones.txt words.txt phones.txt L.fst L_disambig.fst phones; do
     cp -r $data/lang/$f $test
 done
 
-# lz: weird, why 'cat' here
+# LZ: weird, why 'cat' here
 echo "Generating $test/G.fst..."
 cat $lmdir/lm.arpa | \
   arpa2fst --disambig-symbol=#0 \
@@ -66,7 +66,7 @@ fstinfo $tmpdir/g/empty_words.fst | grep cyclic | grep -w 'y' &&
   echo "Language model has cycles with empty words" && exit 1
 echo "*** Finished checking cycles in $test/G.fst..."
 
-# lz: leave it for inspecting
+# LZ: leave it for inspecting
 #rm -rf $tmpdir
 
 echo "*** Succeeded in formatting data."

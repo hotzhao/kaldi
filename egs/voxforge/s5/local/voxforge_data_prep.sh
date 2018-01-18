@@ -38,7 +38,7 @@ mkdir -p $loctmp
 # perl -ane ' s:.*/((.+)\-[0-9]{8,10}[a-z]*([_\-].*)?):$2: && print; ' | \
 #  sort -u > $loctmp/speakers_all.txt
 
-# lz: use something I can understand
+# LZ: use something I can understand
 find $DATA/ -mindepth 1 -maxdepth 1 |\
  perl -ne ' /.*\/(.+)\-[0-9]{8,10}[a-z]*([_\-].*)?/ && print "$1\n" ' | \
   sort -u > $loctmp/speakers_all.txt
@@ -96,10 +96,10 @@ for s in test train; do
       echo "No README file for $d - skipping this directory ..."
       continue
     fi
-    # lz: I'd prefer this way
+    # LZ: I'd prefer this way
     #spkgender=$(perl -ane ' s/.*gender\:\W*(.).*/lc($1)/ei && print; ' <$rdm)
     spkgender=`perl -ne 'm/.*gender\:\W*(.).*/i && print lc($1)' < $rdm `
-    # lz: I'd prefer this way
+    # LZ: I'd prefer this way
     if [ "$spkgender" != "f" ] && [ "$spkgender" != "m" ]; then
     #if [ "$spkgender" != "f" -a "$spkgender" != "m" ]; then
       echo "Illegal or empty gender ($spkgender) for \"$d\" - assuming m(ale) ..."

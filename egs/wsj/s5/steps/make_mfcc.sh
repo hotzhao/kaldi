@@ -127,7 +127,7 @@ else
   # add ,p to the input rspecifier so that we can just skip over
   # utterances that have bad wave data.
 
-  # lz:
+  # LZ:
   # compute-mfcc-feats
   #     scp,p:xxx.scp      	// script, permissive: 	script file
   #     ark:-				        // archive:				standard output

@@ -109,7 +109,7 @@ mkdir -p $dir $tmpdir $dir/phones
 silprob=false
 [ -f $srcdir/lexiconp_silprob.txt ] && silprob=true
 
-#lz: no point to re-run it
+#LZ: no point to re-run it
 #[ -f path.sh ] && . ./path.sh
 
 echo "=== Validating srcdir=$srcdir ..."
