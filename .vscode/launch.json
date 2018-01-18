@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            // "program": "/home/liang/work/speech/kaldi/src/featbin/compute-mfcc-feats",
+            // "args": ["--verbose=2", "--config=/home/liang/work/speech/learnmfcc/mfcc.conf", "scp,p:/home/liang/work/speech/learnmfcc/test.scp", "ark:/home/liang/work/speech/learnmfcc/outdgb.ark"],
+            // "args": ["--verbose=2", "--config=/home/liang/work/speech/learnmfcc/mfcc.conf", "scp,p:/home/liang/work/speech/learnmfcc/test.scp", "ark:-"],
+            "program": "/home/liang/work/speech/kaldi/src/featbin/compute-cmvn-stats",
+            "args": ["--spk2utt=ark:/home/liang/work/speech/corpus/voxforge/selected/test/spk2utt",
+                "scp:/home/liang/work/speech/corpus/voxforge/selected/test/feats.scp",
+                "ark,scp:/home/liang/work/speech/learnmfcc/cmvn_test.ark,/home/liang/work/speech/learnmfcc/cmvn_test.scp"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

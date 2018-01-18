@@ -85,6 +85,13 @@ for x in train test; do
  steps/make_mfcc.sh --cmd "$train_cmd" --nj $njobs \
    $data/$x exp/make_mfcc/$x $mfccdir || exit 1;
  # compute cepstral mean and variance for each speaker
+ #    mean:             simply accumulate all the features of the speaker
+ #    variance:         accumulate all the feature^2 of the speaker
+ # the output is a 2x14 matrix
+ #    row #0 (0..12):   acuumulated mean
+ #    row #0 13:        feature count
+ #    row #1 (0..12):   accumulated variance
+ #    row #1 13:        unused
  steps/compute_cmvn_stats.sh $data/$x exp/make_mfcc/$x $mfccdir || exit 1;
 done
 
