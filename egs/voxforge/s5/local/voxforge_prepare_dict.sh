@@ -38,7 +38,7 @@ awk 'NR==FNR{words[$1]; next;} ($1 in words)' \
 wc -l $locdict/vocab-oov.txt
 wc -l $locdict/lexicon-iv.txt
 
-# lz:
+# LZ:
 # Grapheme to phoneme model
 # For 'guessing' the pronunciation of the OOV words (out of vocabulary)
 if [ ! -f conf/g2p_model ]; then

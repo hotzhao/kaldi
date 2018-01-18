@@ -127,7 +127,7 @@ for s in test train; do
     all_utt2spk_entries=()
     for w in ${dir}/${wavtype}/*${wavtype}; do
       bw=`basename $w`
-      wavname=${bw%.$wavtype} #lz: quite tricky: delete .wav from back of $bw
+      wavname=${bw%.$wavtype} #LZ: quite tricky: delete .wav from back of $bw
       all_wavs+=("$wavname")
       id="${idpfx}-${wavname}"
       if [ ! -s $w ]; then
