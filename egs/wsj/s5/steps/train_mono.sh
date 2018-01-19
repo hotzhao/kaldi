@@ -59,6 +59,9 @@ echo $cmvn_opts  > $dir/cmvn_opts # keep track of options to CMVN.
 #    this is fucking tricky
 #    @feats should first be splitted into 2 parts by the ':'
 #        I.   ark,s,cs
+#             ark:    archieved
+#             s:      sorted (we assert that the keys are sorted)
+#             cs:     called-sorted (HasKey(), Value() functions will also be called in sorted order)
 #        II.  apply-cmvn...|
 #
 #    "apply-cmvn...|" is a fucking concatenated long command

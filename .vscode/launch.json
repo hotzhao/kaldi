@@ -38,9 +38,22 @@
             // "args": ["ark:/home/liang/work/speech/learnmfcc/apply-cmvn-out",
             //     "ark:/home/liang/work/speech/learnmfcc/add-deltas-out"],
 
-            "program": "/home/liang/work/speech/kaldi/src/featbin/feat-to-dim",
-            "args": ["ark,s,cs:/home/liang/work/speech/learnmfcc/add-deltas-out",
-                "-"],
+            // "program": "/home/liang/work/speech/kaldi/src/featbin/feat-to-dim",
+            // "args": ["ark,s,cs:/home/liang/work/speech/learnmfcc/add-deltas-out",
+            //     "-"],
+
+            // "program": "/home/liang/work/speech/kaldi/src/featbin/subset-feats",
+            // "args": ["--n=10",
+            //     "ark:/home/liang/work/speech/learnmfcc/add-deltas-out",
+            //     "ark:/home/liang/work/speech/learnmfcc/subset-feats-out"],
+
+            "program": "/home/liang/work/speech/kaldi/src/gmmbin/gmm-init-mono",
+            "args": ["--shared-phones=/home/liang/work/speech/corpus/voxforge/selected/lang/phones/sets.int",
+                "--train-feats=ark,s,cs:/home/liang/work/speech/learnmfcc/subset-feats-out",
+                "/home/liang/work/speech/corpus/voxforge/selected/lang/topo",
+                "39",
+                "/home/liang/work/speech/learnmfcc/0.mdl",
+                "/home/liang/work/speech/learnmfcc/tree"],
 
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

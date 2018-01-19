@@ -74,11 +74,11 @@ if [ $stage -le -3 ]; then
     exit 1;
   fi
 
-  echo "liang: exit for debug"
-  exit 1;
-
   $cmd JOB=1 $dir/log/init.log \
     gmm-init-mono $shared_phones_opt "--train-feats=$feats subset-feats --n=10 ark:- ark:-|" $lang/topo $feat_dim \
     $dir/0.mdl $dir/tree || exit 1;
 fi
+
+echo "liang: exit for debug"
+exit 1;
 

@@ -95,6 +95,9 @@ int main(int argc, char *argv[]) {
       double count = 0.0;
       Vector<double> var_stats(dim);
       Vector<double> mean_stats(dim);
+      // LZ:
+      // It's okay to use "double reader" to read "float features".
+      // Matrix<Real>::Read(...) will handle the conversion there.
       SequentialDoubleMatrixReader feat_reader(train_feats);
       for (; !feat_reader.Done(); feat_reader.Next()) {
         const Matrix<double> &mat = feat_reader.Value();
