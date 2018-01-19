@@ -3,9 +3,8 @@
 Liang's notes
 ================================
 
-Tricks
---------------------------
-- Use Visual Studio Code on Ubuntu
+### Tricks
+- Use Visual Studio Code on Ubuntu for debug (`kaldi/.vscode/launch.json`)
 - Ctrl+Shift+V for previewing README.md in Visual Studio Code
 - cd kaldi/src/gmmbin && make gmm-init-mono
 
