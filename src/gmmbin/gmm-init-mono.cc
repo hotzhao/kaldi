@@ -91,6 +91,10 @@ int main(int argc, char *argv[]) {
     Vector<BaseFloat> glob_mean(dim);
     glob_mean.Set(1.0);
 
+    // LZ:
+    //    Calculate the global mean/variance based on 'train_feats'.
+    //    It's likely that the train_feats is just a small subset, eg. 10 utterances.
+    //    Also, these 10 utterances should be recorded from different speakers.
     if (train_feats != "") {
       double count = 0.0;
       Vector<double> var_stats(dim);
@@ -103,6 +107,7 @@ int main(int argc, char *argv[]) {
         const Matrix<double> &mat = feat_reader.Value();
         for (int32 i = 0; i < mat.NumRows(); i++) {
           count += 1.0;
+          // Add vector : *this = *this + alpha * rv^2  [element-wise squaring].
           var_stats.AddVec2(1.0, mat.Row(i));
           mean_stats.AddVec(1.0, mat.Row(i));
         }
@@ -110,7 +115,7 @@ int main(int argc, char *argv[]) {
       if (count == 0) { KALDI_ERR << "no features were seen."; }
       var_stats.Scale(1.0/count);
       mean_stats.Scale(1.0/count);
-      var_stats.AddVec2(-1.0, mean_stats);
+      var_stats.AddVec2(-1.0, mean_stats);  // variance = E[X^2] - (E[x])^2
       if (var_stats.Min() <= 0.0)
         KALDI_ERR << "bad variance";
       var_stats.InvertElements();
@@ -142,9 +147,10 @@ int main(int argc, char *argv[]) {
 
     int32 num_pdfs = ctx_dep->NumPdfs();
 
+    // LZ: Acoustic model Gaussian-Mixture-Model with diagonal covariances
     AmDiagGmm am_gmm;
     DiagGmm gmm;
-    gmm.Resize(1, dim);
+    gmm.Resize(1, dim); // LZ: only one mixture component
     {  // Initialize the gmm.
       Matrix<BaseFloat> inv_var(1, dim);
       inv_var.Row(0).CopyFromVec(glob_inv_var);

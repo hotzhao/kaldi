@@ -9,6 +9,12 @@ Liang's notes
 - cd kaldi/src/gmmbin && make gmm-init-mono
 
 
+### Acronym
+- `<eps>` no symbolhere
+- `OOV` out of vocabulary
+
+
+
 Kaldi Speech Recognition Toolkit
 ================================
 
