@@ -1,5 +1,15 @@
 [![Build Status](https://travis-ci.org/kaldi-asr/kaldi.svg?branch=master)](https://travis-ci.org/kaldi-asr/kaldi)
 
+Liang's notes
+================================
+
+Tricks
+--------------------------
+- Use Visual Studio Code on Ubuntu
+- Ctrl+Shift+V for previewing README.md in Visual Studio Code
+- cd kaldi/src/gmmbin && make gmm-init-mono
+
+
 Kaldi Speech Recognition Toolkit
 ================================
 
