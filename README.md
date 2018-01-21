@@ -5,12 +5,13 @@ Liang's notes
 
 ### Tricks
 - Use Visual Studio Code on Ubuntu for debug (`kaldi/.vscode/launch.json`)
+  - C++, Perl
 - Ctrl+Shift+V for previewing README.md in Visual Studio Code
 - cd kaldi/src/gmmbin && make gmm-init-mono
 
 
 ### Acronym
-- `<eps>` no symbolhere
+- `<eps>` epsilon, means no symbol here
 - `OOV` out of vocabulary
 
 

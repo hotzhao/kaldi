@@ -67,6 +67,21 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "type": "perl",
+            "request": "launch",
+            "exec": "/usr/bin/perl",
+            "execArgs": [],
+            "name": "Perl Debug",
+            "root": "${workspaceRoot}",
+            "program": "/home/liang/work/speech/kaldi/egs/voxforge/s5/utils/make_lexicon_fst.pl",
+            "inc": [],
+            "args": ["--pron-probs",
+                "/home/liang/work/speech/learnfst/input/lexiconp.txt",
+                "0.5",
+                "SIL"],
+            "stopOnEntry": true
         }
     ]
 }
