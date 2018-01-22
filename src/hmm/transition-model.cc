@@ -40,18 +40,25 @@ void TransitionModel::ComputeTuplesIsHmm(const ContextDependencyInterface &ctx_d
   KALDI_ASSERT(!phones.empty());
 
   // this is the case for normal models. but not fot chain models
+  // LZ:
+  //    122 pdfs, each pdf -> a list of pairs (phone-version, pdf_class)
+  //    phone-version: [1, 161]
+  //    pdf_class:     [0, 2] or [0, 4]
+  //      one phone-version may have 3 or 5 'pdf_class'es
   std::vector<std::vector<std::pair<int32, int32> > > pdf_info;
   std::vector<int32> num_pdf_classes( 1 + *std::max_element(phones.begin(), phones.end()), -1);
   for (size_t i = 0; i < phones.size(); i++)
     num_pdf_classes[phones[i]] = topo_.NumPdfClasses(phones[i]);
   ctx_dep.GetPdfInfo(phones, num_pdf_classes, &pdf_info);
-  // pdf_info is list indexed by pdf of which (phone, pdf_class) it
-  // can correspond to.
 
   std::map<std::pair<int32, int32>, std::vector<int32> > to_hmm_state_list;
-  // to_hmm_state_list is a map from (phone, pdf_class) to the list
-  // of hmm-states in the HMM for that phone that that (phone, pdf-class)
-  // can correspond to.
+  // LZ:
+  //    to_hmm_state_list is a map from 
+  //    (phone-version, pdf_class) to the list of hmm-states in the HMM for that phone
+  //    from the debug code below, we can see, each list only have one item,
+  //    essentially just (phone, pdf_class) -> pdf_class
+  //    493 = 39 phones * 4 versions * 3 pdf_class + 1 phone * 5 versions * 5 pdf_class
+  //    so there are 493 item in this map.
   for (size_t i = 0; i < phones.size(); i++) {  // setting up to_hmm_state_list.
     int32 phone = phones[i];
     const HmmTopology::TopologyEntry &entry = topo_.TopologyForPhone(phone);
@@ -63,6 +70,23 @@ void TransitionModel::ComputeTuplesIsHmm(const ContextDependencyInterface &ctx_d
     }
   }
 
+  #if 0
+  std::ofstream ofs("/home/liang/tmp/to_hmm_state_list");
+  if (ofs.is_open())
+  {
+      for (auto& kv : to_hmm_state_list)
+    {
+      const std::pair<int32, int32>& key = kv.first;
+      const std::vector<int32>& val = kv.second;
+      ofs<<"phone:"<<key.first<<",pdf_class:"<<key.second<<" -> ";
+      for (const auto& hmmStateIdx : val)
+        ofs<<hmmStateIdx<<", ";
+      ofs<<std::endl;
+    }
+  }
+  ofs.close();
+  #endif
+
   for (int32 pdf = 0; pdf < static_cast<int32>(pdf_info.size()); pdf++) {
     for (size_t j = 0; j < pdf_info[pdf].size(); j++) {
       int32 phone = pdf_info[pdf][j].first,
@@ -71,6 +95,9 @@ void TransitionModel::ComputeTuplesIsHmm(const ContextDependencyInterface &ctx_d
       KALDI_ASSERT(!state_vec.empty());
       // state_vec is a list of the possible HMM-states that emit this
       // pdf_class.
+      // LZ:
+      //    For Voxforge, state_vec.size() is alway one.
+      //    So tuples_.size() = 493 = to_hmm_state_list.size()
       for (size_t k = 0; k < state_vec.size(); k++) {
         int32 hmm_state = state_vec[k];
         tuples_.push_back(Tuple(phone, hmm_state, pdf, pdf));

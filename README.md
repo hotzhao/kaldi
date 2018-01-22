@@ -3,7 +3,10 @@
 Liang's notes
 ================================
 
-### Labs
+Tutorials
+--------------------------
+
+### Labs from Edinburgh
 1. [Data Preparation and Feature Extraction](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab1.pdf)
 2. [Training monophone models](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab2.pdf)
 3. [Word recognition and triphone models](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab3.pdf)
@@ -11,7 +14,7 @@ Liang's notes
 
 ### Tricks
 - Use Visual Studio Code on Ubuntu for debug (`kaldi/.vscode/launch.json`)
-  - C++, Perl
+  - C++, Bash, Perl
 - Ctrl+Shift+V for previewing README.md in Visual Studio Code
 - cd kaldi/src/gmmbin && make gmm-init-mono
 
@@ -66,19 +69,29 @@ number of gaussians 122
 ```
 - non-silence phones
   - phone number: 39
-  - each phone has 4 subphones
-  - each subphone has 3 HmmState (0, 1, 2)
+  - each phone has 4 versions (**B**egin, **E**nd, **I**nternal and **S**ingleton) depending on the position of the phone within a word
+  - each phone-version has 3 HmmState (0, 1, 2)
 - silence phones
   - phone number: 1
-  - 5 subphones: SIL SIL_B SIL_E SIL_I SIL_S
-  - each subphone has 5 HmmState (0, 1, 2, 3, 5)
+  - 5 phone-versions: SIL SIL_B SIL_E SIL_I SIL_S
+  - each phone-version has 5 HmmState (0, 1, 2, 3, 5)
 - number of phones
-  - 161 = 39 * 4 + 1 * 5(subphones)
+  - 161 = 39 * 4 + 1 * 5(phone-versions)
 - number of pdfs / number of gaussians
-  - 122 = 39 * 3 + 1 * 5(HmmState)
+  - 122 = 39 * 3 + 1 * 5(HmmState's)
+  - `shared-phones=$lang/phones/sets.int`, each line contains a list of phones, whose pdfs should be shared. In the following case, all different versions of the original phone share the same pdf.
+```
+SIL SIL_B SIL_E SIL_I SIL_S
+AA_B AA_E AA_I AA_S
+AE_B AE_E AE_I AE_S
+...
+```
 - number of transition-ids
+  - start from 1
+  - for each transition-states, there will be several transitions. Please refer to the HmmTopology content above.
+  - 1026 = (39 * 4) * 3 * 2 + (1 * 5) * 4 * 4 + (1 * 5) * 1 * 2
 - number of transition-states
-  - 493 = 39 * 4 * 3 + 1 * 5 * 5 
+  - 493 = (39 * 4) * 3 + (1 * 5) * 5 
 
 Kaldi Speech Recognition Toolkit
 ================================
