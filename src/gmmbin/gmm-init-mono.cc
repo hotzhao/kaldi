@@ -145,6 +145,11 @@ int main(int argc, char *argv[]) {
       ctx_dep = MonophoneContextDependencyShared(shared_phones, phone2num_pdf_classes);
     }
 
+    // LZ:
+    //    num_sil_states=5
+    //    num_nonsil_states=3 
+    //    please refer to prepare_lang.sh and gen_topo.pl
+    //    num_pdfs = num_nonsil_phonemes * num_nonsil_states + num_sil_phonemes * num_sil_states.
     int32 num_pdfs = ctx_dep->NumPdfs();
 
     // LZ: Acoustic model Gaussian-Mixture-Model with diagonal covariances
@@ -163,6 +168,8 @@ int main(int argc, char *argv[]) {
       gmm.ComputeGconsts();
     }
 
+    // LZ:
+    //    each sub-phoneme state has a corresponding GMM
     for (int i = 0; i < num_pdfs; i++)
       am_gmm.AddPdf(gmm);
 
