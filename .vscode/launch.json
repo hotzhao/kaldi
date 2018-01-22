@@ -67,8 +67,8 @@
                     "ignoreFailures": true
                 }
             ]
-        },
-        {
+        }
+        ,{
             "type": "perl",
             "request": "launch",
             "exec": "/usr/bin/perl",
@@ -82,6 +82,13 @@
                 "0.5",
                 "SIL"],
             "stopOnEntry": true
+        }
+        ,{
+            "type": "bashdb",
+            "request": "launch",
+            "name": "Bash Debug",
+            "scriptPath": "/home/liang/work/speech/learnfst/genfst.sh",
+            "commandLineArguments": "arg1 arg2 arg3"
         }
     ]
 }
