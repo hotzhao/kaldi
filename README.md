@@ -3,6 +3,12 @@
 Liang's notes
 ================================
 
+### Labs
+1. [Data Preparation and Feature Extraction](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab1.pdf)
+2. [Training monophone models](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab2.pdf)
+3. [Word recognition and triphone models](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab3.pdf)
+4. [Hybrid Acoustic Models](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab4.pdf)
+
 ### Tricks
 - Use Visual Studio Code on Ubuntu for debug (`kaldi/.vscode/launch.json`)
   - C++, Perl
