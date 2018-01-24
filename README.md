@@ -51,7 +51,7 @@ Inspect
 </Topology>
 ```
 
-### Train monophone
+### `gmm-init-mono`
 
 To get a summary of the information in the initial acoustic model:
 ```
@@ -130,8 +130,8 @@ the log probability of 1026 transitions (ps: -1.386294 = log0.25, -0.2876821 = l
 ContextDependency corresponds to the binary `voxforge/s5/exp/mono/tree` file
 
 - ContextDependency is a generic decision tree.
-  - N_ : context size
-  - P_ : position of central phone (must be 0)
+  - N_ : context size, **context** is the context-window of phones, of length N. For monophone training, N = 1.
+  - P_ : the central phone [position P] must be a real phone. For monophone training, P = 0.
   - to_pdf_ : EventMap*, should point to SplitEventMap
 - SplitEventMap
   - key_ : EventKeyType, here it's always 0 (P_, position of central phone)
@@ -152,6 +152,60 @@ ContextDependency corresponds to the binary `voxforge/s5/exp/mono/tree` file
 - EventValueType(int): phone-version index, [1, 161]
 - EventAnswerType(int): leaf index
 
+### `sym2int.pl`
+
+From the log, we can see, the whole command is:
+```
+sym2int.pl --map-oov 1 -f 2- /home/liang/work/speech/corpus/voxforge/selected/lang/words.txt < /home/liang/work/speech/corpus/voxforge/selected/train.1k/split6/1/text
+```
+- oov_sym = 1, [(]--map-oov <oov-symbol>], 1 is the index of `!SIL`.
+- -f 2-, [-f <field-range> ], so field range is 2-, means we want to skip the first token, which is the utt-id.
+- symtab = /home/liang/work/speech/corpus/voxforge/selected/lang/words.txt
+- input transcriptions = /home/liang/work/speech/corpus/voxforge/selected/train.1k/split6/1/text
+- take a peek of the first few lines of `words.txt`. It will confirm that oov_sym = 1
+```
+<eps> 0
+!SIL 1
+'EM 2
+A 3
+ABANDON 4
+ABANDONED 5
+...
+```
+- `text` looks like
+```
+Aaron-20080318-pwn-a0268 NOW GO AHEAD AND TELL ME IN A STRAIGHTFORWARD WAY WHAT HAS HAPPENED
+Angus-20080320-cjg-a0159 THEY LOOK AS THOUGH HE HAD BEEN DRUMMING A PIANO ALL HIS LIFE
+Anniepoo-20140308-byi-rb-29 THEREFORE BEHIND YOUR PC GO ONLINE START MY WEB BROWSER OR VISIT MY HOME PAGE
+...
+```
+- the output looks like
+```
+Aaron-20080318-pwn-a0268 8238 5315 277 417 12320 7559 6220 3 11841 13530 13607 5655 5605
+Angus-20080320-cjg-a0159 12447 7258 642 12495 5691 5552 1040 3736 3 8973 316 5842 7120
+Anniepoo-20140308-byi-rb-29 12439 1062 13916 8772 5315 8388 11724 7990 13558 1464 8437 13357 7990 5886 8610
+...
+```
+
+### `compile-train-graphs`
+The command is:
+```
+compile-train-graphs --read-disambig-syms=/home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int exp/mono/tree exp/mono/0.mdl /home/liang/work/speech/corpus/voxforge/selected/lang/L.fst "ark:/home/liang/work/speech/learngmm/sym2int.1.out" "ark:/home/liang/work/speech/learngmm/compile-train-graphs.1.out"
+```
+- tree in: exp/mono/tree
+- model in: exp/mono/0.mdl
+- lexicon fst in: /home/liang/work/speech/corpus/voxforge/selected/lang/L.fst
+- transcriptions in: /home/liang/work/speech/learngmm/sym2int.1.out
+- graphs out: /home/liang/work/speech/learngmm/compile-train-graphs.1.out
+
+TrainingGraphCompilerOptions
+- transition_scale : float=1.0, scale of transition probabilities (excluding self-loops)
+  - ? Change the default to 0.0 since we will generally add the transition probs in the alignment phase
+- self_loop_scale : float=1.0, scale of self-loop vs. non-self-loop probability mass
+- reorder : bool=true, reorder transition ids for greater decoding efficiency
+- rm_eps : bool=false, remove [most] epsilons before minimization (only applicable if disambig symbols present)
+
+TrainingGraphCompiler
 
 
 Kaldi Speech Recognition Toolkit

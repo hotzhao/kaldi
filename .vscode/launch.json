@@ -183,6 +183,31 @@
             ]
         }
         ,{
+            "name": "compile-train-graphs",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/compile-train-graphs",
+            "args": ["--read-disambig-syms=/home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int",
+                "/home/liang/work/speech/learnmfcc/tree",
+                "/home/liang/work/speech/learnmfcc/0.mdl",
+                "/home/liang/work/speech/corpus/voxforge/selected/lang/L.fst",
+                "ark:/home/liang/work/speech/learngmm/sym2int.1.out",
+                "ark:/home/liang/work/speech/learngmm/compile-train-graphs.1.out"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            //"environment": [],
+            //"externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+        ,{
             "name": "make_lexicon_fst.pl",
             "type": "perl",
             "request": "launch",
@@ -195,6 +220,20 @@
                 "/home/liang/work/speech/learnfst/input/lexiconp.txt",
                 "0.5",
                 "SIL"],
+            "stopOnEntry": true
+        }
+        ,{
+            "name": "sym2int.pl",
+            "type": "perl",
+            "request": "launch",
+            "exec": "/usr/bin/perl",
+            "execArgs": [],
+            "root": "${workspaceRoot}",
+            "program": "/home/liang/work/speech/kaldi/egs/voxforge/s5/utils/sym2int.pl",
+            "inc": [],
+            "args": ["--map-oov", "1", "-f", "2-",
+                "/home/liang/work/speech/corpus/voxforge/selected/lang/words.txt",
+                "/home/liang/work/speech/learngmm/sym2int.out"],
             "stopOnEntry": true
         }
         ,{
