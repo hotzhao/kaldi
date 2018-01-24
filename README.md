@@ -25,6 +25,14 @@ Tutorials
 Inspect
 --------------------------
 
+### FST
+lexicon fst, word fst
+
+ImplToMutableFst
+
+`template<A, S=VectorState<A>> VectorFst`
+A stands for Arc. S stands for State.
+
 ### HmmTopology
 ```
 <Topology>
@@ -82,12 +90,14 @@ AA_B AA_E AA_I AA_S
 AE_B AE_E AE_I AE_S
 ...
 ```
-- number of transition-ids
+
+- transition-state : (phone, hmm-state, pdf) triple, in fact (phone, hmm-state) can uniquely specify the transition-state
+  - number = 493 = (39 * 4) * 3 + (1 * 5) * 5
+  - corresponds to an specific hmm-state, which have several transitions. (Please refer to the HmmTopology content above.)
+- transition-id : (phone, hmm-state, transition-index)
+  - number = 1026 = (39 * 4) * 3 * 2 + (1 * 5) * 4 * 4 + (1 * 5) * 1 * 2
   - start from 1
-  - for each transition-states, there will be several transitions. Please refer to the HmmTopology content above.
-  - 1026 = (39 * 4) * 3 * 2 + (1 * 5) * 4 * 4 + (1 * 5) * 1 * 2
-- number of transition-states
-  - 493 = (39 * 4) * 3 + (1 * 5) * 5 
+- transition-index : the index to the transitions in an hmm-state
 
 We can inspect the monophone model (0.mdl) in text format with command:
 ```
@@ -120,6 +130,15 @@ the log probability of 1026 transitions (ps: -1.386294 = log0.25, -0.2876821 = l
 </DiagGMM> 
 ...
 ```
+
+- TransitionModel
+  - topo_ : HmmTopology
+  - tuples_ : std::vector<Tuple>, (phone, hmm-state, pdf) triples indexed by transition state minus one, the triples are in sorted order which allows us to do the reverse mapping from triple to transition state
+  - state2id_ : std::vector<int32>, transition-state ==> the first transition-id of the transition-state
+  - id2state_ : std::vector<int32>, transition-id ==> transition-state
+  - id2pdf_id_ : transition-id ==> pdf
+  - log_probs_ : Vector<BaseFloat>, the log probability of the 1026 transitions
+  - non_self_loop_log_probs_ : For each transition-state, the log of (1 - self-loop-prob). Indexed by transition-state.
 
 - gconst
   - The fxxking constant part in log[bj(Ot)]
@@ -158,8 +177,8 @@ From the log, we can see, the whole command is:
 ```
 sym2int.pl --map-oov 1 -f 2- /home/liang/work/speech/corpus/voxforge/selected/lang/words.txt < /home/liang/work/speech/corpus/voxforge/selected/train.1k/split6/1/text
 ```
-- oov_sym = 1, [(]--map-oov <oov-symbol>], 1 is the index of `!SIL`.
-- -f 2-, [-f <field-range> ], so field range is 2-, means we want to skip the first token, which is the utt-id.
+- oov_sym = 1, `[--map-oov <oov-symbol>]`, 1 is the index of `!SIL`.
+- -f 2-, `[-f <field-range> ]`, so field range is 2-, means we want to skip the first token, which is the utt-id.
 - symtab = /home/liang/work/speech/corpus/voxforge/selected/lang/words.txt
 - input transcriptions = /home/liang/work/speech/corpus/voxforge/selected/train.1k/split6/1/text
 - take a peek of the first few lines of `words.txt`. It will confirm that oov_sym = 1
@@ -197,6 +216,11 @@ compile-train-graphs --read-disambig-syms=/home/liang/work/speech/corpus/voxforg
 - lexicon fst in: /home/liang/work/speech/corpus/voxforge/selected/lang/L.fst
 - transcriptions in: /home/liang/work/speech/learngmm/sym2int.1.out
 - graphs out: /home/liang/work/speech/learngmm/compile-train-graphs.1.out
+- options:
+  - batch_size: by default is 250, process 250 utterances at a time
+  - read-disambig-syms: /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int
+
+It will CompileGraphsFromText(...) for each utterance, 
 
 TrainingGraphCompilerOptions
 - transition_scale : float=1.0, scale of transition probabilities (excluding self-loops)
@@ -206,6 +230,12 @@ TrainingGraphCompilerOptions
 - rm_eps : bool=false, remove [most] epsilons before minimization (only applicable if disambig symbols present)
 
 TrainingGraphCompiler
+- trans_model_ : const TransitionModel&
+- ctx_dep_ : const ContextDependency &
+- lex_fst_ : `fst::VectorFst<fst::StdArc>*`, it will be sorted by olabel in the constructor
+- disambig_syms_ : `std::vector<int32>`
+- lex_cache_ : `fst::TableComposeCache<fst::Fst<fst::StdArc> >`
+- opts_ : TrainingGraphCompilerOptions
 
 
 Kaldi Speech Recognition Toolkit
