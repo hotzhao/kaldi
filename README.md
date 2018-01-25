@@ -25,13 +25,220 @@ Tutorials
 Inspect
 --------------------------
 
-### FST
+### `make_lexicon_fst.pl`
+
+The command line looks like:
+`make_lexicon_fst.pl --pron-probs /home/liang/work/speech/learnfst/input/lexiconp.txt 0.5 SIL > ./output/lexicon_fst.txt`
+- silprob: 0.5
+- silphone: "SIL"
+
+The input `lexiconp.txt` looks like:
+```
+A 1.0 AH_S
+A 1.0 EY_S
+ABANDON 1.0 AH_B B_I AE_I N_I D_I AH_I N_E
+ABANDONED 1.0 AH_B B_I AE_I N_I D_I AH_I N_I D_E
+ABANDONMENT 1.0 AH_B B_I AE_I N_I D_I AH_I N_I M_I AH_I N_I T_E
+...
+```
+
+Let's use a simpler input `lexiconp2.txt` for experiment:
+```
+ABANDON 1.0 AH_B B_I AE_I N_I D_I AH_I N_E
+ABANDONED 1.0 AH_B B_I AE_I N_I D_I AH_I N_I D_E
+```
+
+The output `lexicon2_fst.txt` will be:
+```
+0	1	<eps>	<eps>	0.693147180559945
+0	1	SIL	<eps>	0.693147180559945
+2	1	SIL	<eps>
+1	3	AH_B	ABANDON
+3	4	B_I	<eps>
+4	5	AE_I	<eps>
+5	6	N_I	<eps>
+6	7	D_I	<eps>
+7	8	AH_I	<eps>
+8	1	N_E	<eps>	0.693147180559945
+8	2	N_E	<eps>	0.693147180559945
+1	9	AH_B	ABANDONED
+9	10	B_I	<eps>
+10	11	AE_I	<eps>
+11	12	N_I	<eps>
+12	13	D_I	<eps>
+13	14	AH_I	<eps>
+14	15	N_I	<eps>
+15	1	D_E	<eps>	0.693147180559945
+15	2	D_E	<eps>	0.693147180559945
+1	0
+```
+
+`fstcompile` will compile it into a binary version: 
+`openfst-1.6.5/bin/fstcompile --isymbols=./symbols/phones.txt --osymbols=./symbols/words.txt --keep_isymbols=false --keep_osymbols=false ./output/lexicon2_fst.txt ./output/lexicon2.fst`
+
+We can visualize it with command:
+`openfst-1.6.5/bin/fstdraw --isymbols=../symbols/phones.txt --osymbols=../symbols/words.txt -portrait lexicon2.fst | dot -Tsvg > lexicon2.svg`
+
+<img src="./docs/lexicon2.svg" width="1000" height="200">
+
+
+### FST details
+
+
+
 lexicon fst, word fst
 
-ImplToMutableFst
+Here is the fucking complicated class structure...
+```c++
+// A generic FST, templated on the arc definition, with common-demoninator
+// methods (use StateIterator and ArcIterator to iterate over its states and
+// arcs).
+// just an interface, no member variable
+template <class A>
+class Fst {...};
 
-`template<A, S=VectorState<A>> VectorFst`
-A stands for Arc. S stands for State.
+// A generic FST plus state count.
+template <class A>
+class ExpandedFst : public Fst<A> {
+  virtual StateId NumStates() const = 0;  // State count
+}
+
+// Abstract interface for an expanded FST which also supports mutation
+// operations. To modify arcs, use MutableArcIterator.
+template <class A>
+class MutableFst : public ExpandedFst<A> {...}
+
+// This is a helper class template useful for attaching an FST interface to
+// its implementation, handling reference counting.
+template <class Impl, class FST = Fst<typename Impl::Arc>>
+class ImplToFst : public FST {...}
+
+template <class Impl, class FST = ExpandedFst<typename Impl::Arc>>
+class ImplToExpandedFst : public ImplToFst<Impl, FST> {...}
+
+template <class Impl, class FST = MutableFst<typename Impl::Arc>>
+class ImplToMutableFst : public ImplToExpandedFst<Impl, FST> {...}
+
+// FST implementation base.
+//
+// This is the recommended FST implementation base class. It will handle
+// reference counts, property bits, type information and symbols.
+//
+// Users are discouraged, but not prohibited, from subclassing this outside the
+// FST library.
+template <class Arc>
+class FstImpl {
+  mutable uint64 properties_;  // Property bits.
+  string type_;  // Unique name of FST class.
+  std::unique_ptr<SymbolTable> isymbols_;
+  std::unique_ptr<SymbolTable> osymbols_;
+};
+
+// States are implemented by STL vectors, templated on the
+// State definition. This does not manage the Fst properties.
+template <class State>
+class VectorFstBaseImpl : public FstImpl<typename S::Arc> {
+  using StateId = typename State::Arc::StateId;
+  std::vector<State *> states_;                 // States represenation.
+  StateId start_;                               // Initial state.
+}
+
+// This is a VectorFstBaseImpl container that holds VectorStates and manages FST
+// properties.
+template <class S>
+class VectorFstImpl : public VectorFstBaseImpl<S> {...}
+
+template <class A, class S /* = VectorState<A> */>
+VectorFst : public ImplToMutableFst<internal::VectorFstImpl<S>> {...}
+```
+
+```c++
+// Arcs (of type A) implemented by an STL vector per state. M specifies Arc
+// allocator (default declared in fst-decl.h).
+template <class A, class M /* = std::allocator<A> */>
+class VectorState {
+  using Arc = A;
+  using Weight = typename Arc::Weight;
+
+  Weight final_;                       // Final weight.
+  size_t niepsilons_;                  // # of input epsilons
+  size_t noepsilons_;                  // # of output epsilons
+  std::vector<A, ArcAllocator> arcs_;  // Arc container.
+};
+```
+
+
+```c++
+// We are using VectorFst<StdArc>
+
+using StdArc = ArcTpl<TropicalWeight>;
+
+template <class W>
+struct ArcTpl {
+ public:
+  using Weight = W;
+  using Label = int;
+  using StateId = int;
+
+  Label ilabel;
+  Label olabel;
+  Weight weight;
+  StateId nextstate;
+};
+
+using TropicalWeight = TropicalWeightTpl<float>;
+
+// Tropical semiring: (min, +, inf, 0).
+template <class T>
+class TropicalWeightTpl : public FloatWeightTpl<T> {...}
+
+// Weight class to be templated on floating-points types.
+template <class T = float>
+class FloatWeightTpl {
+  T value_;
+};
+
+```
+
+Fst properties:
+  - kExpanded
+  - kMutable
+  - kError
+  - kAcceptor // ilabel == olabel for each arc
+  - kNotAcceptor // ilabel != olabel for some arc
+  - kIDeterministic // ilabels unique leaving each state
+  - kNonIDeterministic // ilabels not unique leaving some state
+  - kODeterministic // olabels unique leaving each state
+  - kNonODeterministic // olabels not unique leaving some state
+  - kEpsilons // FST has input/output epsilons
+  - kNoEpsilons // FST has no input/output epsilons
+  - kIEpsilons
+  - kNoIEpsilons
+  - kOEpsilons
+  - kNoOEpsilons
+  - kILabelSorted // ilabels sorted wrt < for each state
+  - kNotILabelSorted
+  - kOLabelSorted
+  - kNotOLabelSorted
+  - kWeighted // Non-trivial arc or final weights.
+  - kUnweighted
+  - kCyclic
+  - kAcyclic
+  - kInitialCyclic // FST has cycles containing the initial state
+  - kInitialAcyclic
+  - kTopSorted // FST is topologically sorted
+  - kNotTopSorted
+  - kAccessible // All states reachable from the initial state
+  - kNotAccessible
+  - kCoAccessible // All states can reach a final state
+  - kNotCoAccessible
+  - kString
+    - If NumStates() > 0, then state 0 is initial, state NumStates() - 1 is final, there is a transition from each non-final state i to state i + 1, and there are no other transitions.
+  - kNotString // Not a string FST.
+  - kWeightedCycles // FST has least one weighted cycle.
+  - kUnweightedCycles // Only unweighted cycles.
+
+
 
 ### HmmTopology
 ```
@@ -144,7 +351,7 @@ the log probability of 1026 transitions (ps: -1.386294 = log0.25, -0.2876821 = l
   - The fxxking constant part in log[bj(Ot)]
   - bj(Ot) = the probability of feature vector 'Ot' generated by hmm-state j
   - the detailed inference
-  - <img src="https://raw.githubusercontent.com/hotzhao/kaldi/3b27feb16bae882783df76ffffc8340b2e5976c7/src/gmm/gmm-prob-gconst.jpeg" width="350" height="250">
+  - <img src="./docs/gmm-prob-gconst.jpeg" width="350" height="250">
 
 ContextDependency corresponds to the binary `voxforge/s5/exp/mono/tree` file
 

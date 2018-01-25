@@ -36,6 +36,7 @@
                 "/usr/include",
                 "/home/liang/work/speech/kaldi/src",
                 "/home/liang/work/speech/kaldi/tools/openfst/include",
+                "/home/liang/work/speech/kaldi/tools/openfst/include/fst",
                 "${workspaceRoot}"
             ],
             "defines": [],
@@ -50,6 +51,7 @@
                     "/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed",
                     "/usr/include/x86_64-linux-gnu",
                     "/usr/include",
+                    "/home/liang/work/speech/kaldi/tools/openfst",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
