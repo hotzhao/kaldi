@@ -84,10 +84,6 @@ We can visualize it with command:
 
 ### FST details
 
-
-
-lexicon fst, word fst
-
 Here is the fucking complicated class structure...
 ```c++
 // A generic FST, templated on the arc definition, with common-demoninator
@@ -167,7 +163,6 @@ class VectorState {
 };
 ```
 
-
 ```c++
 // We are using VectorFst<StdArc>
 
@@ -198,6 +193,21 @@ class FloatWeightTpl {
   T value_;
 };
 
+static const TropicalWeightTpl<T> &Zero() {
+  static const TropicalWeightTpl zero(Limits::PosInfinity());
+  return zero;
+}
+
+// worth noting
+static const TropicalWeightTpl<T> &One() {
+  static const TropicalWeightTpl one(0.0F);
+  return one;
+}
+
+static const TropicalWeightTpl<T> &NoWeight() {
+  static const TropicalWeightTpl no_weight(Limits::NumberBad());
+  return no_weight;
+}
 ```
 
 Fst properties:
@@ -238,7 +248,56 @@ Fst properties:
   - kWeightedCycles // FST has least one weighted cycle.
   - kUnweightedCycles // Only unweighted cycles.
 
+Context fst:
+```c++
+// Actual FST for ContextFst.  Most of the work gets done in ContextFstImpl.
+//
+// A ContextFst is a transducer from symbols representing phones-in-context,
+// to phones.  It is an on-demand FST.  However, it does not create itself in the usual
+// way by expanding states by enumerating all their arcs.  This is possible to enable
+// iterating over arcs, but it is not recommended.  Instead, we define a special
+// Matcher class that knows how to request the specific arc corresponding to a particular
+// output label.
+//
+// This class requires a list of all the phones and disambiguation
+// symbols, plus the subsequential symbol.  This is required to be able to
+// enumerate all output symbols (if we want to access it in an inefficient way), and
+// also to distinguish between phones and disambiguation symbols.
+template <class Arc,
+          class LabelT = int32> // make the vector<LabelT> things actually vector<int32> for
+                                // easier compatibility with Kaldi code.
+class ContextFst : public ImplToFst<internal::ContextFstImpl<Arc, LabelT>> {
+};
 
+// ContextFstImpl inherits from CacheImpl, which handles caching of states.
+template <class Arc,
+          class LabelT = int32>
+class ContextFstImpl : public CacheImpl<Arc> {
+};
+
+// A CacheBaseImpl with the default cache state type.
+template <class Arc>
+class CacheImpl : public CacheBaseImpl<CacheState<Arc>> {
+};
+
+// This class is used to cache FST elements stored in states of type State
+// (see CacheState) with the flags used to indicate what has been cached. Use
+// HasStart(), HasFinal(), and HasArcs() to determine if cached and SetStart(),
+// SetFinal(), AddArc(), (or PushArc() and SetArcs()) to cache. Note that you
+// must set the final weight even if the state is non-final to mark it as
+// cached. The state storage method and any garbage collection policy are
+// determined by the cache store. If the store is passed in with the options,
+// CacheBaseImpl takes ownership.
+template <class State,
+          class CacheStore = DefaultCacheStore<typename State::Arc>>
+class CacheBaseImpl : public FstImpl<typename State::Arc> {
+};
+
+// Cache state, with arcs stored in a per-state std::vector.
+template <class A, class M = PoolAllocator<A>>
+class CacheState {}
+
+```
 
 ### HmmTopology
 ```
@@ -300,7 +359,7 @@ AE_B AE_E AE_I AE_S
 
 - transition-state : (phone, hmm-state, pdf) triple, in fact (phone, hmm-state) can uniquely specify the transition-state
   - number = 493 = (39 * 4) * 3 + (1 * 5) * 5
-  - corresponds to an specific hmm-state, which have several transitions. (Please refer to the HmmTopology content above.)
+  - corresponds to an specific hmm-state, which has several transitions. (Please refer to the HmmTopology content above.)
 - transition-id : (phone, hmm-state, transition-index)
   - number = 1026 = (39 * 4) * 3 * 2 + (1 * 5) * 4 * 4 + (1 * 5) * 1 * 2
   - start from 1
@@ -427,8 +486,6 @@ compile-train-graphs --read-disambig-syms=/home/liang/work/speech/corpus/voxforg
   - batch_size: by default is 250, process 250 utterances at a time
   - read-disambig-syms: /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int
 
-It will CompileGraphsFromText(...) for each utterance, 
-
 TrainingGraphCompilerOptions
 - transition_scale : float=1.0, scale of transition probabilities (excluding self-loops)
   - ? Change the default to 0.0 since we will generally add the transition probs in the alignment phase
@@ -439,10 +496,51 @@ TrainingGraphCompilerOptions
 TrainingGraphCompiler
 - trans_model_ : const TransitionModel&
 - ctx_dep_ : const ContextDependency &
-- lex_fst_ : `fst::VectorFst<fst::StdArc>*`, it will be sorted by olabel in the constructor
+- lex_fst_ : `fst::VectorFst<fst::StdArc>*`, lexicon fst, it will be sorted by olabel in the constructor
 - disambig_syms_ : `std::vector<int32>`
 - lex_cache_ : `fst::TableComposeCache<fst::Fst<fst::StdArc> >`
 - opts_ : TrainingGraphCompilerOptions
+
+This is the **core** functions:
+```c++
+bool TrainingGraphCompiler::CompileGraphsFromText(
+    const std::vector<std::vector<int32> > &transcripts,
+    std::vector<fst::VectorFst<fst::StdArc>*> *out_fsts) {
+  using namespace fst;
+  std::vector<const VectorFst<StdArc>* > word_fsts(transcripts.size());
+  for (size_t i = 0; i < transcripts.size(); i++) {
+    VectorFst<StdArc> *word_fst = new VectorFst<StdArc>();
+    MakeLinearAcceptor(transcripts[i], word_fst);
+    word_fsts[i] = word_fst;
+  }    
+  bool ans = CompileGraphs(word_fsts, out_fsts);
+  for (size_t i = 0; i < transcripts.size(); i++)
+    delete word_fsts[i];
+  return ans;
+}
+
+template<class Arc, class I>
+void MakeLinearAcceptor(const vector<I> &labels, MutableFst<Arc> *ofst) {
+  // labels can be a vector like:
+  //    8238 5315 277 417 12320 7559 6220 3 11841 13530 13607 5655 5605
+  // We are composing the `word fst` here. The `word fst` is a string like fst.
+
+  typedef typename Arc::StateId StateId;
+  typedef typename Arc::Weight Weight;
+
+  ofst->DeleteStates();
+  StateId cur_state = ofst->AddState();
+  ofst->SetStart(cur_state);
+  for (size_t i = 0; i < labels.size(); i++) {
+    StateId next_state = ofst->AddState();
+    Arc arc(labels[i], labels[i], Weight::One(), next_state);
+    ofst->AddArc(cur_state, arc);
+    cur_state = next_state;
+  }
+  ofst->SetFinal(cur_state, Weight::One());
+}
+```
+
 
 
 Kaldi Speech Recognition Toolkit
