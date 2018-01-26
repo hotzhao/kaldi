@@ -77,7 +77,7 @@ class TrainingGraphCompiler {
   // time.  This consumes more memory but is faster.
   bool CompileGraphs(
       const std::vector<const fst::VectorFst<fst::StdArc> *> &word_fsts,
-      std::vector<fst::VectorFst<fst::StdArc> *> *out_fsts);
+      std::vector<fst::VectorFst<fst::StdArc> *> *out_fsts, bool doPeekFsts = false);
 
   // This version creates an FST from the text and calls CompileGraph.
   bool CompileGraphFromText(const std::vector<int32> &transcript,
@@ -86,7 +86,7 @@ class TrainingGraphCompiler {
   // This function creates FSTs from the text and calls CompileGraphs.
   bool CompileGraphsFromText(
       const std::vector<std::vector<int32> >  &word_grammar,
-      std::vector<fst::VectorFst<fst::StdArc> *> *out_fsts);
+      std::vector<fst::VectorFst<fst::StdArc> *> *out_fsts, bool doPeekFsts = false);
   
   
   ~TrainingGraphCompiler() { delete lex_fst_; }

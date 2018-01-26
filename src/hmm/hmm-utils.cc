@@ -235,11 +235,68 @@ GetHmmAsFstSimple(std::vector<int32> phone_window,
 
 // The H transducer has a separate outgoing arc for each of the symbols in ilabel_info.
 
+void GetHTransducerInspect(
+  const ContextDependencyInterface& ctx_dep,
+  const TransitionModel& trans_model,
+  const HTransducerConfig& config)
+{
+  // fake input for inspect
+  std::vector<std::vector<int32> > ilabel_info;
+  ilabel_info.resize(5);
+  // ilabel_info[0] is left empty for <eps>
+  ilabel_info[1].push_back(1); // SIL, 5+1 states
+  ilabel_info[2].push_back(2); // SIL, 5+1 states
+  ilabel_info[3].push_back(6); // 3+1 states
+  ilabel_info[4].push_back(7); // 3+1 states
+
+  using namespace fst;
+  typedef StdArc Arc;
+  typedef Arc::Weight Weight;
+  typedef Arc::StateId StateId;
+  typedef Arc::Label Label;
+
+  std::vector<const ExpandedFst<Arc>* > fsts(ilabel_info.size(), NULL);
+
+  for (int32 j = 1; j < static_cast<int32>(ilabel_info.size()); j++) // zero is eps.
+  {  
+    std::vector<int32> phone_window = ilabel_info[j];
+
+    VectorFst<Arc> *fst = GetHmmAsFst(phone_window,
+                                      ctx_dep,
+                                      trans_model,
+                                      config,
+                                      nullptr);
+    fsts[j] = fst;
+
+    char outfstpath[256];
+    sprintf(outfstpath, "/home/liang/work/speech/learnfst/compile-train-graphs/phone-transition.%d.fst", phone_window[0]);
+    fst->Write(outfstpath);
+  }
+
+  VectorFst<Arc> *ans = MakeLoopFst(fsts);
+
+  ans->Write("/home/liang/work/speech/learnfst/compile-train-graphs/MakeLoopFstOut.fst");
+
+  // LZ: quite confused
+  //    will 'ans' be changed after we 'SortAndUniq(&fsts)' ?
+  //    according to the simple test, there should be no difference.
+  SortAndUniq(&fsts); // remove duplicate pointers, which we will have
+  // in general, since we used the cache.
+  DeletePointers(&fsts);
+
+  // ans->Write("/home/liang/work/speech/learnfst/compile-train-graphs/MakeLoopFstOut.again.fst");
+}
+
 fst::VectorFst<fst::StdArc> *GetHTransducer (const std::vector<std::vector<int32> > &ilabel_info,
                                              const ContextDependencyInterface &ctx_dep,
                                              const TransitionModel &trans_model,
                                              const HTransducerConfig &config,
                                              std::vector<int32> *disambig_syms_left) {
+
+  #if 0
+  GetHTransducerInspect(ctx_dep, trans_model, config);
+  #endif
+
   KALDI_ASSERT(ilabel_info.size() >= 1 && ilabel_info[0].size() == 0);  // make sure that eps == eps.
   HmmCacheType cache;
   // "cache" is an optimization that prevents GetHmmAsFst repeating work

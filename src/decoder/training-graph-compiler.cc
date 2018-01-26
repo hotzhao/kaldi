@@ -147,15 +147,18 @@ bool TrainingGraphCompiler::CompileGraph(const fst::VectorFst<fst::StdArc> &word
 
 bool TrainingGraphCompiler::CompileGraphsFromText(
     const std::vector<std::vector<int32> > &transcripts,
-    std::vector<fst::VectorFst<fst::StdArc>*> *out_fsts) {
+    std::vector<fst::VectorFst<fst::StdArc>*> *out_fsts, bool doPeekFsts) {
   using namespace fst;
   std::vector<const VectorFst<StdArc>* > word_fsts(transcripts.size());
   for (size_t i = 0; i < transcripts.size(); i++) {
     VectorFst<StdArc> *word_fst = new VectorFst<StdArc>();
     MakeLinearAcceptor(transcripts[i], word_fst);
     word_fsts[i] = word_fst;
+
+    if (doPeekFsts && i == 37)
+      word_fst->Write("/home/liang/work/speech/learnfst/compile-train-graphs/word_linear_acceptor.fst");
   }    
-  bool ans = CompileGraphs(word_fsts, out_fsts);
+  bool ans = CompileGraphs(word_fsts, out_fsts, doPeekFsts);
   for (size_t i = 0; i < transcripts.size(); i++)
     delete word_fsts[i];
   return ans;
@@ -163,7 +166,7 @@ bool TrainingGraphCompiler::CompileGraphsFromText(
 
 bool TrainingGraphCompiler::CompileGraphs(
     const std::vector<const fst::VectorFst<fst::StdArc>* > &word_fsts,
-    std::vector<fst::VectorFst<fst::StdArc>* > *out_fsts) {
+    std::vector<fst::VectorFst<fst::StdArc>* > *out_fsts, bool doPeekFsts) {
 
   using namespace fst;
   KALDI_ASSERT(lex_fst_ !=NULL);
@@ -190,11 +193,18 @@ bool TrainingGraphCompiler::CompileGraphs(
     // TableCompose more efficient than compose.
     TableCompose(*lex_fst_, *(word_fsts[i]), &phone2word_fst, &lex_cache_);
 
+    if (doPeekFsts && i == 37)
+      phone2word_fst.Write("/home/liang/work/speech/learnfst/compile-train-graphs/phone2word.fst");
+
     KALDI_ASSERT(phone2word_fst.Start() != kNoStateId &&
                  "Perhaps you have words missing in your lexicon?");
     
     VectorFst<StdArc> ctx2word_fst;
     ComposeContextFst(*cfst, phone2word_fst, &ctx2word_fst);
+
+    if (doPeekFsts && i == 37)
+      ctx2word_fst.Write("/home/liang/work/speech/learnfst/compile-train-graphs/ctx2word.0.fst");
+
     // ComposeContextFst is like Compose but faster for this particular Fst type.
     // [and doesn't expand too many arcs in the ContextFst.]
 
@@ -219,7 +229,13 @@ bool TrainingGraphCompiler::CompileGraphs(
     VectorFst<StdArc> trans2word_fst;
     TableCompose(*H, ctx2word_fst, &trans2word_fst);
 
+    if (doPeekFsts && i == 37)
+      trans2word_fst.Write("/home/liang/work/speech/learnfst/compile-train-graphs/trans2word_0.fst");
+
     DeterminizeStarInLog(&trans2word_fst);
+
+    if (doPeekFsts && i == 37)
+      trans2word_fst.Write("/home/liang/work/speech/learnfst/compile-train-graphs/trans2word_1_DeterminizeStarInLog.fst");
 
     if (!disambig_syms_h.empty()) {
       RemoveSomeInputSymbols(disambig_syms_h, &trans2word_fst);
@@ -230,6 +246,9 @@ bool TrainingGraphCompiler::CompileGraphs(
     // Encoded minimization.
     MinimizeEncoded(&trans2word_fst);
 
+    if (doPeekFsts && i == 37)
+      trans2word_fst.Write("/home/liang/work/speech/learnfst/compile-train-graphs/trans2word_2_MinimizeEncoded.fst");
+
     std::vector<int32> disambig;
     AddSelfLoops(trans_model_,
                  disambig,
@@ -238,6 +257,9 @@ bool TrainingGraphCompiler::CompileGraphs(
                  &trans2word_fst);
 
     KALDI_ASSERT(trans2word_fst.Start() != kNoStateId);
+
+    if (doPeekFsts && i == 37)
+      trans2word_fst.Write("/home/liang/work/speech/learnfst/compile-train-graphs/trans2word_3_AddSelfLoops.fst");
 
     *((*out_fsts)[i]) = trans2word_fst;
   }

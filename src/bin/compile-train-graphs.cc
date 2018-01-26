@@ -126,11 +126,15 @@ int main(int argc, char *argv[]) {
           keys.push_back(transcript_reader.Key());
           transcripts.push_back(transcript_reader.Value());
         }
+
+        #define LZ_PEEK_FSTS 0
+
         std::vector<fst::VectorFst<fst::StdArc>* > fsts;
-        if (!gc.CompileGraphsFromText(transcripts, &fsts)) {
+        if (!gc.CompileGraphsFromText(transcripts, &fsts, LZ_PEEK_FSTS)) {
           KALDI_ERR << "Not expecting CompileGraphs to fail.";
         }
         KALDI_ASSERT(fsts.size() == keys.size());
+        
         for (size_t i = 0; i < fsts.size(); i++) {
           if (fsts[i]->Start() != fst::kNoStateId) {
             num_succeed++;
