@@ -76,228 +76,13 @@ The output `lexicon2_fst.txt` will be:
 `fstcompile` will compile it into a binary version: 
 `openfst-1.6.5/bin/fstcompile --isymbols=./symbols/phones.txt --osymbols=./symbols/words.txt --keep_isymbols=false --keep_osymbols=false ./output/lexicon2_fst.txt ./output/lexicon2.fst`
 
+`fstprint` can convert it back to text format:
+`openfst-1.6.5/bin/fstprint --isymbols=./symbols/phones.txt --osymbols=./symbols/words.txt ./output/lexicon2.fst ./output/lexicon2_fst.o.txt`
+
 We can visualize it with command:
 `openfst-1.6.5/bin/fstdraw --isymbols=../symbols/phones.txt --osymbols=../symbols/words.txt -portrait lexicon2.fst | dot -Tsvg > lexicon2.svg`
 
 <img src="./docs/lexicon2.svg" width="1000" height="200">
-
-
-### FST details
-
-Here is the fucking complicated class structure...
-```c++
-// A generic FST, templated on the arc definition, with common-demoninator
-// methods (use StateIterator and ArcIterator to iterate over its states and
-// arcs).
-// just an interface, no member variable
-template <class A>
-class Fst {...};
-
-// A generic FST plus state count.
-template <class A>
-class ExpandedFst : public Fst<A> {
-  virtual StateId NumStates() const = 0;  // State count
-}
-
-// Abstract interface for an expanded FST which also supports mutation
-// operations. To modify arcs, use MutableArcIterator.
-template <class A>
-class MutableFst : public ExpandedFst<A> {...}
-
-// This is a helper class template useful for attaching an FST interface to
-// its implementation, handling reference counting.
-template <class Impl, class FST = Fst<typename Impl::Arc>>
-class ImplToFst : public FST {...}
-
-template <class Impl, class FST = ExpandedFst<typename Impl::Arc>>
-class ImplToExpandedFst : public ImplToFst<Impl, FST> {...}
-
-template <class Impl, class FST = MutableFst<typename Impl::Arc>>
-class ImplToMutableFst : public ImplToExpandedFst<Impl, FST> {...}
-
-// FST implementation base.
-//
-// This is the recommended FST implementation base class. It will handle
-// reference counts, property bits, type information and symbols.
-//
-// Users are discouraged, but not prohibited, from subclassing this outside the
-// FST library.
-template <class Arc>
-class FstImpl {
-  mutable uint64 properties_;  // Property bits.
-  string type_;  // Unique name of FST class.
-  std::unique_ptr<SymbolTable> isymbols_;
-  std::unique_ptr<SymbolTable> osymbols_;
-};
-
-// States are implemented by STL vectors, templated on the
-// State definition. This does not manage the Fst properties.
-template <class State>
-class VectorFstBaseImpl : public FstImpl<typename S::Arc> {
-  using StateId = typename State::Arc::StateId;
-  std::vector<State *> states_;                 // States represenation.
-  StateId start_;                               // Initial state.
-}
-
-// This is a VectorFstBaseImpl container that holds VectorStates and manages FST
-// properties.
-template <class S>
-class VectorFstImpl : public VectorFstBaseImpl<S> {...}
-
-template <class A, class S /* = VectorState<A> */>
-VectorFst : public ImplToMutableFst<internal::VectorFstImpl<S>> {...}
-```
-
-```c++
-// Arcs (of type A) implemented by an STL vector per state. M specifies Arc
-// allocator (default declared in fst-decl.h).
-template <class A, class M /* = std::allocator<A> */>
-class VectorState {
-  using Arc = A;
-  using Weight = typename Arc::Weight;
-
-  Weight final_;                       // Final weight.
-  size_t niepsilons_;                  // # of input epsilons
-  size_t noepsilons_;                  // # of output epsilons
-  std::vector<A, ArcAllocator> arcs_;  // Arc container.
-};
-```
-
-```c++
-// We are using VectorFst<StdArc>
-
-using StdArc = ArcTpl<TropicalWeight>;
-
-template <class W>
-struct ArcTpl {
- public:
-  using Weight = W;
-  using Label = int;
-  using StateId = int;
-
-  Label ilabel;
-  Label olabel;
-  Weight weight;
-  StateId nextstate;
-};
-
-using TropicalWeight = TropicalWeightTpl<float>;
-
-// Tropical semiring: (min, +, inf, 0).
-template <class T>
-class TropicalWeightTpl : public FloatWeightTpl<T> {...}
-
-// Weight class to be templated on floating-points types.
-template <class T = float>
-class FloatWeightTpl {
-  T value_;
-};
-
-static const TropicalWeightTpl<T> &Zero() {
-  static const TropicalWeightTpl zero(Limits::PosInfinity());
-  return zero;
-}
-
-// worth noting
-static const TropicalWeightTpl<T> &One() {
-  static const TropicalWeightTpl one(0.0F);
-  return one;
-}
-
-static const TropicalWeightTpl<T> &NoWeight() {
-  static const TropicalWeightTpl no_weight(Limits::NumberBad());
-  return no_weight;
-}
-```
-
-Fst properties:
-  - kExpanded
-  - kMutable
-  - kError
-  - kAcceptor // ilabel == olabel for each arc
-  - kNotAcceptor // ilabel != olabel for some arc
-  - kIDeterministic // ilabels unique leaving each state
-  - kNonIDeterministic // ilabels not unique leaving some state
-  - kODeterministic // olabels unique leaving each state
-  - kNonODeterministic // olabels not unique leaving some state
-  - kEpsilons // FST has input/output epsilons
-  - kNoEpsilons // FST has no input/output epsilons
-  - kIEpsilons
-  - kNoIEpsilons
-  - kOEpsilons
-  - kNoOEpsilons
-  - kILabelSorted // ilabels sorted wrt < for each state
-  - kNotILabelSorted
-  - kOLabelSorted
-  - kNotOLabelSorted
-  - kWeighted // Non-trivial arc or final weights.
-  - kUnweighted
-  - kCyclic
-  - kAcyclic
-  - kInitialCyclic // FST has cycles containing the initial state
-  - kInitialAcyclic
-  - kTopSorted // FST is topologically sorted
-  - kNotTopSorted
-  - kAccessible // All states reachable from the initial state
-  - kNotAccessible
-  - kCoAccessible // All states can reach a final state
-  - kNotCoAccessible
-  - kString
-    - If NumStates() > 0, then state 0 is initial, state NumStates() - 1 is final, there is a transition from each non-final state i to state i + 1, and there are no other transitions.
-  - kNotString // Not a string FST.
-  - kWeightedCycles // FST has least one weighted cycle.
-  - kUnweightedCycles // Only unweighted cycles.
-
-Context fst:
-```c++
-// Actual FST for ContextFst.  Most of the work gets done in ContextFstImpl.
-//
-// A ContextFst is a transducer from symbols representing phones-in-context,
-// to phones.  It is an on-demand FST.  However, it does not create itself in the usual
-// way by expanding states by enumerating all their arcs.  This is possible to enable
-// iterating over arcs, but it is not recommended.  Instead, we define a special
-// Matcher class that knows how to request the specific arc corresponding to a particular
-// output label.
-//
-// This class requires a list of all the phones and disambiguation
-// symbols, plus the subsequential symbol.  This is required to be able to
-// enumerate all output symbols (if we want to access it in an inefficient way), and
-// also to distinguish between phones and disambiguation symbols.
-template <class Arc,
-          class LabelT = int32> // make the vector<LabelT> things actually vector<int32> for
-                                // easier compatibility with Kaldi code.
-class ContextFst : public ImplToFst<internal::ContextFstImpl<Arc, LabelT>> {
-};
-
-// ContextFstImpl inherits from CacheImpl, which handles caching of states.
-template <class Arc,
-          class LabelT = int32>
-class ContextFstImpl : public CacheImpl<Arc> {
-};
-
-// A CacheBaseImpl with the default cache state type.
-template <class Arc>
-class CacheImpl : public CacheBaseImpl<CacheState<Arc>> {
-};
-
-// This class is used to cache FST elements stored in states of type State
-// (see CacheState) with the flags used to indicate what has been cached. Use
-// HasStart(), HasFinal(), and HasArcs() to determine if cached and SetStart(),
-// SetFinal(), AddArc(), (or PushArc() and SetArcs()) to cache. Note that you
-// must set the final weight even if the state is non-final to mark it as
-// cached. The state storage method and any garbage collection policy are
-// determined by the cache store. If the store is passed in with the options,
-// CacheBaseImpl takes ownership.
-template <class State,
-          class CacheStore = DefaultCacheStore<typename State::Arc>>
-class CacheBaseImpl : public FstImpl<typename State::Arc> {
-};
-
-// Cache state, with arcs stored in a per-state std::vector.
-template <class A, class M = PoolAllocator<A>>
-class CacheState {}
-
-```
 
 ### HmmTopology
 ```
@@ -477,8 +262,8 @@ The command is:
 ```
 compile-train-graphs --read-disambig-syms=/home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int exp/mono/tree exp/mono/0.mdl /home/liang/work/speech/corpus/voxforge/selected/lang/L.fst "ark:/home/liang/work/speech/learngmm/sym2int.1.out" "ark:/home/liang/work/speech/learngmm/compile-train-graphs.1.out"
 ```
-- tree in: exp/mono/tree
-- model in: exp/mono/0.mdl
+- tree in: exp/mono/tree, ContextDependency
+- model in: exp/mono/0.mdl, TransitionModel
 - lexicon fst in: /home/liang/work/speech/corpus/voxforge/selected/lang/L.fst
 - transcriptions in: /home/liang/work/speech/learngmm/sym2int.1.out
 - graphs out: /home/liang/work/speech/learngmm/compile-train-graphs.1.out
@@ -486,61 +271,48 @@ compile-train-graphs --read-disambig-syms=/home/liang/work/speech/corpus/voxforg
   - batch_size: by default is 250, process 250 utterances at a time
   - read-disambig-syms: /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int
 
-TrainingGraphCompilerOptions
-- transition_scale : float=1.0, scale of transition probabilities (excluding self-loops)
-  - ? Change the default to 0.0 since we will generally add the transition probs in the alignment phase
-- self_loop_scale : float=1.0, scale of self-loop vs. non-self-loop probability mass
-- reorder : bool=true, reorder transition ids for greater decoding efficiency
-- rm_eps : bool=false, remove [most] epsilons before minimization (only applicable if disambig symbols present)
+For each utterance/sentence, it will generate an *transition-id-to-utterance fst*.
+- FST's input: transition-id
+- FST's output: the utterance
+All the output FSTs will be archived into one file. The utterance-id will be used as the key to index these FSTs. In practice, the archived file will be gzip'ed.
 
-TrainingGraphCompiler
-- trans_model_ : const TransitionModel&
-- ctx_dep_ : const ContextDependency &
-- lex_fst_ : `fst::VectorFst<fst::StdArc>*`, lexicon fst, it will be sorted by olabel in the constructor
-- disambig_syms_ : `std::vector<int32>`
-- lex_cache_ : `fst::TableComposeCache<fst::Fst<fst::StdArc> >`
-- opts_ : TrainingGraphCompilerOptions
+Here we'll take the following utterance as an example to look into the detailed steps to generate the final FST.
+`Dcoetzee-20110429-rmx-a0562 WHAT THE FLAMING`
+After converting the words into integers, it will be:
+`Dcoetzee-20110429-rmx-a0562 13607 12412 4745`
 
-This is the **core** functions:
-```c++
-bool TrainingGraphCompiler::CompileGraphsFromText(
-    const std::vector<std::vector<int32> > &transcripts,
-    std::vector<fst::VectorFst<fst::StdArc>*> *out_fsts) {
-  using namespace fst;
-  std::vector<const VectorFst<StdArc>* > word_fsts(transcripts.size());
-  for (size_t i = 0; i < transcripts.size(); i++) {
-    VectorFst<StdArc> *word_fst = new VectorFst<StdArc>();
-    MakeLinearAcceptor(transcripts[i], word_fst);
-    word_fsts[i] = word_fst;
-  }    
-  bool ans = CompileGraphs(word_fsts, out_fsts);
-  for (size_t i = 0; i < transcripts.size(); i++)
-    delete word_fsts[i];
-  return ans;
-}
+- 1, generate a *word-linear-acceptor fst*:
+  - <img src="./docs/word_linear_acceptor.svg" height="40">
 
-template<class Arc, class I>
-void MakeLinearAcceptor(const vector<I> &labels, MutableFst<Arc> *ofst) {
-  // labels can be a vector like:
-  //    8238 5315 277 417 12320 7559 6220 3 11841 13530 13607 5655 5605
-  // We are composing the `word fst` here. The `word fst` is a string like fst.
+- 2, compose the *input lexicon fst* and the *word-linear-acceptor fst* to generate a *phone-to-utterance fst*
+  - <img src="./docs/phone2word.svg" height="50">
 
-  typedef typename Arc::StateId StateId;
-  typedef typename Arc::Weight Weight;
+- 3, generate a kind of *context-to-phone fst*, please refer to ContextFst in `/kaldi/src/fstext/context-fst.h`
+This is for phone-in-context. For monophone traning, the width of the context window is just one. Here the phone-in-context is essentially the phone.
 
-  ofst->DeleteStates();
-  StateId cur_state = ofst->AddState();
-  ofst->SetStart(cur_state);
-  for (size_t i = 0; i < labels.size(); i++) {
-    StateId next_state = ofst->AddState();
-    Arc arc(labels[i], labels[i], Weight::One(), next_state);
-    ofst->AddArc(cur_state, arc);
-    cur_state = next_state;
-  }
-  ofst->SetFinal(cur_state, Weight::One());
-}
-```
+- 4, compose the *context-to-phone fst* and the *phone-to-utterance fst* to generate a *context-to-utterance fst*
+  - <img src="./docs/ctx2word.0.svg" height="50">
 
+- 5, produce a kind of *transition-id-to-context fst* 
+  - 5.1, for each phone, produce a small transition-id-to-phone fst
+  - 5.2, here are 2 small ones for non-silent phones
+    - <img src="./docs/phone-transition.6.svg" width="300">
+    - <img src="./docs/phone-transition.7.svg" width="300">
+  - 5.3, here are 2 small ones for silent phones
+    - <img src="./docs/phone-transition.1.svg" width="300">
+    - <img src="./docs/phone-transition.2.svg" width="300">
+  - 5.4, all these small fst's will be combined together by MakeLoopFst(...) in `kaldi/src/fstext/fstext-utils-inl.h`. The following picture is just a combination of 4 phones. In practice, there will be more than 100 phones.
+    - <img src="./docs/MakeLoopFstOut.svg" width="300">
+
+- 6, compose *transition-id-to-context fst* and *context-to-utterance fst*, to generate a *transition-id-to-utterance fst*
+  - raw combination:
+    - <img src="./docs/trans2word_0.svg" height="50">
+  - DeterminizeStarInLog:
+    - <img src="./docs/trans2word_1_DeterminizeStarInLog.svg" height="50">
+  - MinimizeEncoded:
+    - <img src="./docs/trans2word_2_MinimizeEncoded.svg" height="50">
+  - AddSelfLoops, we get the final result:
+    - <img src="./docs/trans2word_3_AddSelfLoops.svg" height="50">
 
 
 Kaldi Speech Recognition Toolkit
