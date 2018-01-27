@@ -74,15 +74,30 @@ The output `lexicon2_fst.txt` will be:
 ```
 
 `fstcompile` will compile it into a binary version: 
+
 `openfst-1.6.5/bin/fstcompile --isymbols=./symbols/phones.txt --osymbols=./symbols/words.txt --keep_isymbols=false --keep_osymbols=false ./output/lexicon2_fst.txt ./output/lexicon2.fst`
 
+Please note:
+- From the shell-level, the FST arc type can be specified to fstcompile with the --arc_type flag; `StdArc` is the default. 
+- `StdArc` uses `TropicalWeight`
+  - TropicalWeight::Zero() = +inf, which is -ln(0)
+  - TropicalWeight::One() = 0, which is -ln(1)
+- A transition with Weight::One() is, in essence, "free".
+- The transitions in `lexicon2_fst.txt` with no probability specified, by default, will have probability TropicalWeight::One(), which is 0.
+- Please refer to http://www.openfst.org/twiki/bin/view/FST/FstQuickTour for more detailed info.
+
 `fstprint` can convert it back to text format:
+
 `openfst-1.6.5/bin/fstprint --isymbols=./symbols/phones.txt --osymbols=./symbols/words.txt ./output/lexicon2.fst ./output/lexicon2_fst.o.txt`
 
 We can visualize it with command:
+
 `openfst-1.6.5/bin/fstdraw --isymbols=../symbols/phones.txt --osymbols=../symbols/words.txt -portrait lexicon2.fst | dot -Tsvg > lexicon2.svg`
 
-<img src="./docs/lexicon2.svg" width="1000" height="200">
+<img src="./docs/lexicon2.svg" width="1000">
+
+With `--show_weight_one` option added to `fstdraw`, we'll get 
+<img src="./docs/lexicon2.showweightone.svg" width="1000">
 
 ### HmmTopology
 ```
@@ -313,6 +328,26 @@ This is for phone-in-context. For monophone traning, the width of the context wi
     - <img src="./docs/trans2word_2_MinimizeEncoded.svg" height="50">
   - AddSelfLoops, we get the final result:
     - <img src="./docs/trans2word_3_AddSelfLoops.svg" height="50">
+
+### `align-equal-compiled`
+
+Given
+- a transition-id-to-utterance fst
+- the corresponding feature matrix
+  - number of rows = frame_length
+  - number of columns = 39 (feature dimension)
+
+First, we choose a random path from the start state to the final state.
+
+Here, each input label is a transition-id.
+
+Each non-zero input label corresponds to one frame.
+
+Along this random path, *num_ilabels* frames will be consumed.
+
+So we still have *frame_length - num_ilabels* frames to consume.
+
+
 
 
 Kaldi Speech Recognition Toolkit
