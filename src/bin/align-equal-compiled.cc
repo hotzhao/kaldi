@@ -65,6 +65,12 @@ int main(int argc, char *argv[]) {
 
     for (; !fst_reader.Done(); fst_reader.Next()) {
       std::string key = fst_reader.Key();
+
+      #if 0
+      if (key == "Dcoetzee-20110429-rmx-a0562")
+        std::cout<<"debug break"<<std::endl;
+      #endif
+
       if (!feature_reader.HasKey(key)) {
         KALDI_WARN << "No features for utterance " << key;
         no_feat++;

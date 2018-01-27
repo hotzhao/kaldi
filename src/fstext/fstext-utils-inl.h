@@ -842,7 +842,13 @@ bool EqualAlign(const Fst<Arc> &ifst,
       StateId s = path.back();
       size_t num_arcs = ifst.NumArcs(s);
       size_t num_arcs_tot = num_arcs;
-      if (ifst.Final(s) != Weight::Zero()) num_arcs_tot++;
+
+      // LZ:
+      //    TropicalWeightTpl zero(Limits::PosInfinity());
+      //    Any state with non-infinite final weight is a final state.
+      if (ifst.Final(s) != Weight::Zero())
+        num_arcs_tot++;
+
       // kaldi::RandInt is a bit like Rand(), but gets around situations
       // where RAND_MAX is very small.
       // Change this to Rand() % num_arcs_tot if compile issues arise
