@@ -21,10 +21,9 @@ Tutorials
 - `<eps>` epsilon, means no symbol here
 - `OOV` out of vocabulary
 
-Inspect
---------------------------
 
-### `make_lexicon_fst.pl`
+Generate the lexicon fst. `utils/make_lexicon_fst.pl`
+--------------------------
 
 The command line looks like:
 `make_lexicon_fst.pl --pron-probs /home/liang/work/speech/learnfst/input/lexiconp.txt 0.5 SIL > ./output/lexicon_fst.txt`
@@ -77,7 +76,7 @@ The output `lexicon2_fst.txt` will be:
 `openfst-1.6.5/bin/fstcompile --isymbols=./symbols/phones.txt --osymbols=./symbols/words.txt --keep_isymbols=false --keep_osymbols=false ./output/lexicon2_fst.txt ./output/lexicon2.fst`
 
 Please note:
-- From the shell-level, the FST arc type can be specified to fstcompile with the --arc_type flag; `StdArc` is the default. 
+- From the shell-level, the FST arc type can be specified to `fstcompile` with the `--arc_type` flag. `StdArc` is the default arc type.
 - `StdArc` uses `TropicalWeight`
   - TropicalWeight::Zero() = +inf, which is -ln(0)
   - TropicalWeight::One() = 0, which is -ln(1)
@@ -85,7 +84,7 @@ Please note:
 - The transitions in `lexicon2_fst.txt` with no probability specified, by default, will have probability TropicalWeight::One(), which is 0.
 - Please refer to http://www.openfst.org/twiki/bin/view/FST/FstQuickTour for more detailed info.
 
-`fstprint` can convert it back to text format:
+`fstprint` can convert `lexicon2.fst` back into text format:
 
 `openfst-1.6.5/bin/fstprint --isymbols=./symbols/phones.txt --osymbols=./symbols/words.txt ./output/lexicon2.fst ./output/lexicon2_fst.o.txt`
 
@@ -98,7 +97,9 @@ We can visualize it with command:
 With `--show_weight_one` option added to `fstdraw`, we'll get 
 <img src="./lexicon2.showweightone.svg" width="1000">
 
-### HmmTopology
+Generate HmmTopology. `utils/gen_topo.pl`
+--------------------------
+
 ```
 <Topology>
 <TopologyEntry>
@@ -124,7 +125,10 @@ With `--show_weight_one` option added to `fstdraw`, we'll get
 </Topology>
 ```
 
-### `gmm-init-mono`
+Generate TransitionModel & ContextDependency for monophone training. `gmm-init-mono`
+--------------------------
+
+### TransitionModel, `voxforge/s5/exp/mono/0.mdl`
 
 To get a summary of the information in the initial acoustic model:
 ```
@@ -211,7 +215,7 @@ the log probability of 1026 transitions (ps: -1.386294 = log0.25, -0.2876821 = l
   - the detailed inference
   - <img src="./gmm-prob-gconst.jpeg" width="350" height="250">
 
-ContextDependency corresponds to the binary `voxforge/s5/exp/mono/tree` file
+### ContextDependency, `voxforge/s5/exp/mono/tree`
 
 - ContextDependency is a generic decision tree.
   - N_ : context size, **context** is the context-window of phones, of length N. For monophone training, N = 1.
@@ -236,7 +240,8 @@ ContextDependency corresponds to the binary `voxforge/s5/exp/mono/tree` file
 - EventValueType(int): phone-version index, [1, 161]
 - EventAnswerType(int): leaf index
 
-### `sym2int.pl`
+Convert the words in utterance to integers  `sym2int.pl`
+--------------------------
 
 From the log, we can see, the whole command is:
 ```
@@ -271,7 +276,9 @@ Anniepoo-20140308-byi-rb-29 12439 1062 13916 8772 5315 8388 11724 7990 13558 146
 ...
 ```
 
-### `compile-train-graphs`
+Generate transition-id-to-utterance fsts for monophone training, `compile-train-graphs.cc`
+--------------------------
+
 The command is:
 ```
 compile-train-graphs --read-disambig-syms=/home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int exp/mono/tree exp/mono/0.mdl /home/liang/work/speech/corpus/voxforge/selected/lang/L.fst "ark:/home/liang/work/speech/learngmm/sym2int.1.out" "ark:/home/liang/work/speech/learngmm/compile-train-graphs.1.out"
@@ -328,23 +335,27 @@ This is for phone-in-context. For monophone traning, the width of the context wi
   - AddSelfLoops, we get the final result:
     - <img src="./trans2word_3_AddSelfLoops.svg" height="50">
 
-### `align-equal-compiled`
+Equally align transition-ids to the input features for each utterance, `align-equal-compiled.cc`
+--------------------------
 
-Given
+Input
 - a transition-id-to-utterance fst
 - the corresponding feature matrix
-  - number of rows = frame_length
+  - number of rows = *frame_length*
   - number of columns = 39 (feature dimension)
 
-First, we choose a random path from the start state to the final state.
+Output
+- a transition-id sequence
+  - it's length equals to *frame_length*
+  - so it's aligned with the input feature
 
-Here, each input label is a transition-id.
+Note that, in the input fst, each non-zero input label is a transition-id (ps: transition-id is 1-based). Each transition-id corresponds to one transition, and will consume/generate one frame of feature.
 
-Each non-zero input label corresponds to one frame.
+First, we choose a *random path* from the start state to the final state of the input fst. When choosing random path, we exclude self-loops. Along this random path, say there are *num_ilabels* non-zero input labels, which means *num_ilabels* frames will be consumed. In order to consume all the input frames, we still have *frame_length - num_ilabels* left.
 
-Along this random path, *num_ilabels* frames will be consumed.
+Then we use the self-loops, whose ilabel != 0, to consume the rest frames. Along the *random path*, there will be certain number of states which have self-loops that meet our requirement: ilabel != 0. Now, we can evenly distribute the rest frames upon those states.
 
-So we still have *frame_length - num_ilabels* frames to consume.
+Finally, we gather all the non-zero input labels in a vector as our output. These output vectors will be archived into a binary file. Each vector is indexed by the utterance id.
 
 
 
