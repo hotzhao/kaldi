@@ -75,9 +75,9 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/liang/work/speech/kaldi/src/featbin/apply-cmvn",
-            "args": ["--utt2spk=ark:/home/liang/work/speech/corpus/voxforge/selected/train.1k/split1/1/utt2spk",
-               "scp:/home/liang/work/speech/corpus/voxforge/selected/train.1k/split1/1/cmvn.scp",
-               "scp:/home/liang/work/speech/corpus/voxforge/selected/train.1k/split1/1/feats.scp",
+            "args": ["--utt2spk=ark:/home/liang/work/speech/corpus/voxforge/selected/train.1k/split6/1/utt2spk",
+               "scp:/home/liang/work/speech/corpus/voxforge/selected/train.1k/split6/1/cmvn.scp",
+               "scp:/home/liang/work/speech/corpus/voxforge/selected/train.1k/split6/1/feats.scp",
                "ark:/home/liang/work/speech/learnmfcc/apply-cmvn-out"],
 
             "stopAtEntry": false,
