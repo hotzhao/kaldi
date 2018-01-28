@@ -166,8 +166,8 @@
                 "--train-feats=ark,s,cs:/home/liang/work/speech/learnmfcc/subset-feats-out",
                 "/home/liang/work/speech/corpus/voxforge/selected/lang/topo",
                 "39",
-                "/home/liang/work/speech/learnmfcc/0.mdl",
-                "/home/liang/work/speech/learnmfcc/tree"],
+                "/home/liang/work/speech/learngmm/0.mdl",
+                "/home/liang/work/speech/learngmm/tree"],
 
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -188,11 +188,82 @@
             "request": "launch",
             "program": "/home/liang/work/speech/kaldi/src/bin/compile-train-graphs",
             "args": ["--read-disambig-syms=/home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int",
-                "/home/liang/work/speech/learnmfcc/tree",
-                "/home/liang/work/speech/learnmfcc/0.mdl",
+                "/home/liang/work/speech/learngmm/tree",
+                "/home/liang/work/speech/learngmm/0.mdl",
                 "/home/liang/work/speech/corpus/voxforge/selected/lang/L.fst",
                 "ark:/home/liang/work/speech/learngmm/sym2int.1.out",
                 "ark:/home/liang/work/speech/learngmm/compile-train-graphs.1.out"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            //"environment": [],
+            //"externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+        ,{
+            "name": "align-equal-compiled",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/align-equal-compiled",
+            "args": ["ark:/home/liang/work/speech/learngmm/compile-train-graphs.1.out",
+            "ark,s,cs:/home/liang/work/speech/learnmfcc/add-deltas-out",
+            "ark,t:/home/liang/work/speech/learngmm/align-equal-compiled.out"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            //"environment": [],
+            //"externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+        ,{
+            "name": "gmm-acc-stats-ali",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/gmmbin/gmm-acc-stats-ali",
+            "args": ["--binary=true",
+            "/home/liang/work/speech/learngmm/0.mdl",
+            "ark,s,cs:/home/liang/work/speech/learnmfcc/add-deltas-out",
+            "ark:/home/liang/work/speech/learngmm/align-equal-compiled.out",
+            "/home/liang/work/speech/learngmm/gmm-acc-stats-ali.out"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            //"environment": [],
+            //"externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+        ,{
+            "name": "gmm-est",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/gmmbin/gmm-est",
+            "args": ["--min-gaussian-occupancy=3",
+            "--mix-up=122",
+            "--power=0.25",
+            "/home/liang/work/speech/learngmm/0.mdl",
+            "/home/liang/work/speech/learngmm/gmm-acc-stats-ali.out",
+            "/home/liang/work/speech/learngmm/1.mdl"],
 
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
