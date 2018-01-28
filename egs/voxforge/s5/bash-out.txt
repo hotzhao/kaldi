@@ -1,0 +1,384 @@
+liang@liang-msi:~/work/speech/kaldi/egs/voxforge/s5$ ./run.sh 
+=== Starting VoxForge subset selection(accent: ((American)|(British)|(Australia)|(Zealand))) ...
+*** VoxForge subset selection finished!
+=== Starting to map anonymous users to unique IDs ...
+/home/liang/work/speech/corpus/voxforge/selected/local
+--- Mapping the "anonymous" speakers to unique IDs ...
+*** Finished mapping anonymous users!
+=== Starting initial VoxForge data preparation ...
+--- Making test/train data split ...
+2003 /home/liang/work/speech/corpus/voxforge/selected/local/tmp/speakers_all.txt
+ 1983 /home/liang/work/speech/corpus/voxforge/selected/local/tmp/speakers_train.txt
+   20 /home/liang/work/speech/corpus/voxforge/selected/local/tmp/speakers_test.txt
+ 2003 total
+--- Preparing test_wav.scp, test_trans.txt and test.utt2spk ...
+--- Preparing test.spk2utt ...
+--- Preparing train_wav.scp, train_trans.txt and train.utt2spk ...
+Illegal or empty gender (u) for "anonymous0107-20080905-tvm" - assuming m(ale) ...
+Illegal or empty gender (p) for "anonymous0354-20091027-coy" - assuming m(ale) ...
+Illegal or empty gender (u) for "anonymous0532-20100612-ojf" - assuming m(ale) ...
+Illegal or empty gender (p) for "anonymous0728-20110406-opo" - assuming m(ale) ...
+Illegal or empty gender (p) for "anonymous0764-20110719-rxx" - assuming m(ale) ...
+Illegal or empty gender (p) for "anonymous1208-20140513-nmn" - assuming m(ale) ...
+Illegal or empty gender (u) for "guilherme-20080123-pfh" - assuming m(ale) ...
+Illegal or empty gender (u) for "ridgey-20080620-zrx" - assuming m(ale) ...
+--- Preparing train.spk2utt ...
+421 errors detected in the transcripts. Check exp/data_prep/make_trans.log for details!
+*** Initial VoxForge data preparation finished!
+=== Building a language model ...
+--- Preparing a corpus from test and train transcripts ...
+*** Finished building the LM model!
+=== Preparing the dictionary ...
+--- Striping stress and pronunciation variant markers from cmudict ...
+133287 forms processed
+123699 baseforms, 9283 variants and 305 duplicates found.
+variant distribution:
+2	8591
+3	527
+4	165
+--- Searching for OOV words ...
+1365 /home/liang/work/speech/corpus/voxforge/selected/local/dict/vocab-oov.txt
+14699 /home/liang/work/speech/corpus/voxforge/selected/local/dict/lexicon-iv.txt
+--- Preparing pronunciations for OOV words ...
+failed to convert "-pau-": translation failed
+failed to convert "<unk>": translation failed
+stack usage:  1245
+--- Prepare phone lists ...
+--- Adding SIL to the lexicon ...
+*** Dictionary preparation finished!
+utils/prepare_lang.sh --position-dependent-phones true /home/liang/work/speech/corpus/voxforge/selected/local/dict !SIL /home/liang/work/speech/corpus/voxforge/selected/local/lang /home/liang/work/speech/corpus/voxforge/selected/lang
+=== Validating srcdir=/home/liang/work/speech/corpus/voxforge/selected/local/dict ...
+Checking /home/liang/work/speech/corpus/voxforge/selected/local/dict/silence_phones.txt ...
+--> reading /home/liang/work/speech/corpus/voxforge/selected/local/dict/silence_phones.txt
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> /home/liang/work/speech/corpus/voxforge/selected/local/dict/silence_phones.txt is OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/local/dict/optional_silence.txt ...
+--> reading /home/liang/work/speech/corpus/voxforge/selected/local/dict/optional_silence.txt
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> /home/liang/work/speech/corpus/voxforge/selected/local/dict/optional_silence.txt is OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/local/dict/nonsilence_phones.txt ...
+--> reading /home/liang/work/speech/corpus/voxforge/selected/local/dict/nonsilence_phones.txt
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> /home/liang/work/speech/corpus/voxforge/selected/local/dict/nonsilence_phones.txt is OK
+
+Checking disjoint: silence_phones.txt, nonsilence_phones.txt
+--> disjoint property is OK.
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/local/dict/lexicon.txt
+--> reading /home/liang/work/speech/corpus/voxforge/selected/local/dict/lexicon.txt
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> /home/liang/work/speech/corpus/voxforge/selected/local/dict/lexicon.txt is OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/local/dict/extra_questions.txt ...
+--> /home/liang/work/speech/corpus/voxforge/selected/local/dict/extra_questions.txt is empty (this is OK)
+--> SUCCESS [validating dictionary directory /home/liang/work/speech/corpus/voxforge/selected/local/dict]
+
+*** Validating srcdir finished! 
+**Creating /home/liang/work/speech/corpus/voxforge/selected/local/dict/lexiconp.txt from /home/liang/work/speech/corpus/voxforge/selected/local/dict/lexicon.txt
+unk_fst=
+phone_symbol_table=
+extra_word_disambig_syms=
+position_dependent_phones=true
+  silprob=false
+  adding _B, _E, _S, _I in /home/liang/work/speech/corpus/voxforge/selected/local/lang/lexiconp.txt
+  creating /home/liang/work/speech/corpus/voxforge/selected/local/lang/phone_map.txt...
+mkdir /home/liang/work/speech/corpus/voxforge/selected/lang/phones
+share_silence_phones=false
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/sets.txt...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/roots.txt...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.txt...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.txt...
++ cp /home/liang/work/speech/corpus/voxforge/selected/local/dict/optional_silence.txt /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.txt
++ cp /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.txt /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.txt
++ set +x
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/extra_questions.txt...
+position_dependent_phones=true
+Appending /home/liang/work/speech/corpus/voxforge/selected/lang/phones/extra_questions.txt...
+unk_fst=
+silprob=false
+  Generating /home/liang/work/speech/corpus/voxforge/selected/local/lang/lexiconp_disambig.txt...
+Generating /home/liang/work/speech/corpus/voxforge/selected/local/lang/lex_ndisambig...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.txt...
+extra_word_disambig_syms=
+phone_symbol_table=
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones.txt...
+position_dependent_phones=true
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.txt...
+silprob=false
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/words.txt...
+extra_word_disambig_syms=
+silphone=SIL
+Generating /home/liang/work/speech/corpus/voxforge/selected/local/lang/align_lexicon.txt...
+silphone=SIL
+  Appending /home/liang/work/speech/corpus/voxforge/selected/local/lang/align_lexicon.txt...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/align_lexicon.txt...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/align_lexicon.int...
+silprob=false
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/L.fst...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/oov.txt...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/oov.int...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/wdisambig.txt...
+extra_word_disambig_syms=
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/wdisambig_phones.int...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/wdisambig_words.int...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.csl...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.csl...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.csl...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.csl...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.csl...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/sets.int...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/extra_questions.int...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/roots.int...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.int...
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/topo...
+silprob=false
+fstaddselfloops /home/liang/work/speech/corpus/voxforge/selected/lang/phones/wdisambig_phones.int /home/liang/work/speech/corpus/voxforge/selected/lang/phones/wdisambig_words.int 
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang/L_disambig.fst...
+unk_fst=
+prepare_lang.sh: validating output directory
+utils/validate_lang.pl /home/liang/work/speech/corpus/voxforge/selected/lang
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones.txt ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones.txt is OK
+
+Checking words.txt: #0 ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/words.txt is OK
+
+Checking disjoint: silence.txt, nonsilence.txt, disambig.txt ...
+--> silence.txt and nonsilence.txt are disjoint
+--> silence.txt and disambig.txt are disjoint
+--> disambig.txt and nonsilence.txt are disjoint
+--> disjoint property is OK
+
+Checking sumation: silence.txt, nonsilence.txt, disambig.txt ...
+--> summation property is OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.{txt, int, csl} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 5 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.csl corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/context_indep.{txt, int, csl} are OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.{txt, int, csl} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 156 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.csl corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/nonsilence.{txt, int, csl} are OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.{txt, int, csl} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 5 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.csl corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/silence.{txt, int, csl} are OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.{txt, int, csl} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 1 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.csl corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.{txt, int, csl} are OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.{txt, int, csl} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 6 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.csl corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.{txt, int, csl} are OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/roots.{txt, int} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 40 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/roots.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/roots.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/roots.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/roots.{txt, int} are OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/sets.{txt, int} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 40 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/sets.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/sets.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/sets.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/sets.{txt, int} are OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/extra_questions.{txt, int} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 9 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/extra_questions.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/extra_questions.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/extra_questions.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/extra_questions.{txt, int} are OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.{txt, int} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 161 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.{txt, int} are OK
+
+Checking optional_silence.txt ...
+--> reading /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/optional_silence.txt is OK
+
+Checking disambiguation symbols: #0 and #1
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.txt has "#0" and "#1"
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.txt is OK
+
+Checking topo ...
+
+Checking word_boundary.txt: silence.txt, nonsilence.txt, disambig.txt ...
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.txt doesn't include disambiguation symbols
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.txt is the union of nonsilence.txt and silence.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/word_boundary.txt is OK
+
+Checking word-level disambiguation symbols...
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/phones/wdisambig.txt exists (newer prepare_lang.sh)
+Checking word_boundary.int and disambig.int
+--> generating a 49 word sequence
+--> resulting phone sequence from L.fst corresponds to the word sequence
+--> L.fst is OK
+--> generating a 50 word sequence
+--> resulting phone sequence from L_disambig.fst corresponds to the word sequence
+--> L_disambig.fst is OK
+
+Checking /home/liang/work/speech/corpus/voxforge/selected/lang/oov.{txt, int} ...
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+--> 1 entry/entries in /home/liang/work/speech/corpus/voxforge/selected/lang/oov.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/oov.int corresponds to /home/liang/work/speech/corpus/voxforge/selected/lang/oov.txt
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/oov.{txt, int} are OK
+
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/L.fst is olabel sorted
+--> /home/liang/work/speech/corpus/voxforge/selected/lang/L_disambig.fst is olabel sorted
+--> SUCCESS [validating lang directory /home/liang/work/speech/corpus/voxforge/selected/lang]
+=== Preparing train and test data ...
+Prepare folder: /home/liang/work/speech/corpus/voxforge/selected/train & test
+--- Preparing the grammar transducer (G.fst) for testing ...
+Prepare folder: /home/liang/work/speech/corpus/voxforge/selected/lang_test
+Generating /home/liang/work/speech/corpus/voxforge/selected/lang_test/G.fst...
+arpa2fst --disambig-symbol=#0 --read-symbol-table=/home/liang/work/speech/corpus/voxforge/selected/lang_test/words.txt - /home/liang/work/speech/corpus/voxforge/selected/lang_test/G.fst 
+LOG (arpa2fst[5.3.73~1-65b8]:Read():arpa-file-parser.cc:94) Reading \data\ section.
+LOG (arpa2fst[5.3.73~1-65b8]:Read():arpa-file-parser.cc:149) Reading \1-grams: section.
+LOG (arpa2fst[5.3.73~1-65b8]:Read():arpa-file-parser.cc:149) Reading \2-grams: section.
+LOG (arpa2fst[5.3.73~1-65b8]:RemoveRedundantStates():arpa-lm-compiler.cc:359) Reduced num-states from 13940 to 13940
++ fstisstochastic /home/liang/work/speech/corpus/voxforge/selected/lang_test/G.fst
+fstisstochastic /home/liang/work/speech/corpus/voxforge/selected/lang_test/G.fst 
+-1.34195e-06 -0.450832
++ set +x
+=== Checking cyclic in /home/liang/work/speech/corpus/voxforge/selected/lang_test/G.fst...
+*** Finished checking cycles in /home/liang/work/speech/corpus/voxforge/selected/lang_test/G.fst...
+*** Succeeded in formatting data.
+steps/make_mfcc.sh --cmd run.pl --mem 4G --nj 6 /home/liang/work/speech/corpus/voxforge/selected/train exp/make_mfcc/train /home/liang/work/speech/corpus/voxforge/mfcc
+=== Make MFCC...
+data=/home/liang/work/speech/corpus/voxforge/selected/train
+logdir=exp/make_mfcc/train
+mfccdir=/home/liang/work/speech/corpus/voxforge/mfcc
+Checking /home/liang/work/speech/corpus/voxforge/selected/train/text ...
+--> reading /home/liang/work/speech/corpus/voxforge/selected/train/text
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+utils/validate_data_dir.sh: Successfully validated data-directory /home/liang/work/speech/corpus/voxforge/selected/train
+steps/make_mfcc.sh: [info]: no segments file exists: assuming wav.scp indexed by utterance.
+Succeeded creating MFCC features for train
+steps/compute_cmvn_stats.sh /home/liang/work/speech/corpus/voxforge/selected/train exp/make_mfcc/train /home/liang/work/speech/corpus/voxforge/mfcc
+Succeeded creating CMVN stats for train
+steps/make_mfcc.sh --cmd run.pl --mem 4G --nj 6 /home/liang/work/speech/corpus/voxforge/selected/test exp/make_mfcc/test /home/liang/work/speech/corpus/voxforge/mfcc
+=== Make MFCC...
+data=/home/liang/work/speech/corpus/voxforge/selected/test
+logdir=exp/make_mfcc/test
+mfccdir=/home/liang/work/speech/corpus/voxforge/mfcc
+Checking /home/liang/work/speech/corpus/voxforge/selected/test/text ...
+--> reading /home/liang/work/speech/corpus/voxforge/selected/test/text
+--> text seems to be UTF-8 or ASCII, checking whitespaces
+--> text contains only allowed whitespaces
+utils/validate_data_dir.sh: Successfully validated data-directory /home/liang/work/speech/corpus/voxforge/selected/test
+steps/make_mfcc.sh: [info]: no segments file exists: assuming wav.scp indexed by utterance.
+Succeeded creating MFCC features for test
+steps/compute_cmvn_stats.sh /home/liang/work/speech/corpus/voxforge/selected/test exp/make_mfcc/test /home/liang/work/speech/corpus/voxforge/mfcc
+Succeeded creating CMVN stats for test
+utils/subset_data_dir.sh: reducing #utt from 59049 to 1000
+steps/train_mono.sh --nj 6 --cmd run.pl --mem 4G /home/liang/work/speech/corpus/voxforge/selected/train.1k /home/liang/work/speech/corpus/voxforge/selected/lang exp/mono
+steps/train_mono.sh: Initializing monophone system.
+steps/train_mono.sh: Compiling training graphs
+steps/train_mono.sh: Aligning data equally (pass 0)
+steps/train_mono.sh: Pass 1
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 2
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 3
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 4
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 5
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 6
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 7
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 8
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 9
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 10
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 11
+steps/train_mono.sh: Pass 12
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 13
+steps/train_mono.sh: Pass 14
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 15
+steps/train_mono.sh: Pass 16
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 17
+steps/train_mono.sh: Pass 18
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 19
+steps/train_mono.sh: Pass 20
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 21
+steps/train_mono.sh: Pass 22
+steps/train_mono.sh: Pass 23
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 24
+steps/train_mono.sh: Pass 25
+steps/train_mono.sh: Pass 26
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 27
+steps/train_mono.sh: Pass 28
+steps/train_mono.sh: Pass 29
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 30
+steps/train_mono.sh: Pass 31
+steps/train_mono.sh: Pass 32
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 33
+steps/train_mono.sh: Pass 34
+steps/train_mono.sh: Pass 35
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 36
+steps/train_mono.sh: Pass 37
+steps/train_mono.sh: Pass 38
+steps/train_mono.sh: Aligning data
+steps/train_mono.sh: Pass 39
+steps/diagnostic/analyze_alignments.sh --cmd run.pl --mem 4G /home/liang/work/speech/corpus/voxforge/selected/lang exp/mono
+steps/diagnostic/analyze_alignments.sh: see stats in exp/mono/log/analyze_alignments.log
+1433 warnings in exp/mono/log/align.*.*.log
+154 warnings in exp/mono/log/acc.*.*.log
+exp/mono: nj=6 align prob=-92.03 over 1.39h [retry=1.9%, fail=0.2%] states=122 gauss=996
+steps/train_mono.sh: Done training monophone system in exp/mono
+LZ: stop here for debugging
