@@ -6,10 +6,15 @@ Tutorials
 --------------------------
 
 ### Labs from Edinburgh
-1. [Data Preparation and Feature Extraction](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab1.pdf)
-2. [Training monophone models](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab2.pdf)
-3. [Word recognition and triphone models](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab3.pdf)
-4. [Hybrid Acoustic Models](https://github.com/hotzhao/kaldi/blob/lz-voxforge/docs/lab4.pdf)
+1. [Data Preparation and Feature Extraction](https://github.com/kuuzhao/kaldi/blob/lz-voxforge/docs/lab1.pdf)
+2. [Training monophone models](https://github.com/kuuzhao/kaldi/blob/lz-voxforge/docs/lab2.pdf)
+3. [Word recognition and triphone models](https://github.com/kuuzhao/kaldi/blob/lz-voxforge/docs/lab3.pdf)
+4. [Hybrid Acoustic Models](https://github.com/kuuzhao/kaldi/blob/lz-voxforge/docs/lab4.pdf)
+
+### related papers
+- SPEECH RECOGNITION WITH WEIGHTED FINITE-STATE TRANSDUCERS
+- "Tree-based State Tying for High Accuracy Acoustic Modeling" by Young, Odell and Woodland.
+- "The subspace Gaussian mixture model--A structured model for speech recognition". (Computer Speech and Language, 2011)
 
 ### Tricks
 - Use Visual Studio Code on Ubuntu for debug (`kaldi/.vscode/launch.json`)
@@ -18,6 +23,7 @@ Tutorials
 - cd kaldi/src/gmmbin && make gmm-init-mono
 
 ### Acronym
+- `asr` automatic speech recognition
 - `<eps>` epsilon, means no symbol here
 - `OOV` out of vocabulary
 - `MLE` maximum-likelihood estimates
@@ -25,7 +31,11 @@ Tutorials
 - `objf` objective function
 - `objf impr` objective function improvement
 - `occupation` means how many times
-
+- `ali` alignment
+- `CLG` = C o L o G, C(phonetic context), L(lexicon), G(grammar)
+- `HTransducer` = H(HMM), transition-id ==> context-dependent phones
+- `acc` accumulate
+- `sgmm` subspace Gaussian mixture model
 
 Generate the lexicon fst. `utils/make_lexicon_fst.pl`
 --------------------------
@@ -288,7 +298,7 @@ Anniepoo-20140308-byi-rb-29 12439 1062 13916 8772 5315 8388 11724 7990 13558 146
 ...
 ```
 
-Generate transition-id-to-utterance fsts for monophone training, `compile-train-graphs.cc`
+Generate transition-id-to-word fsts for monophone training, `compile-train-graphs.cc`
 --------------------------
 
 The command is:
@@ -304,8 +314,8 @@ The command is:
   - batch_size: by default is 250, process 250 utterances at a time
   - read-disambig-syms: /home/liang/work/speech/corpus/voxforge/selected/lang/phones/disambig.int
 
-For each utterance/sentence, it will generate an *transition-id-to-utterance fst*.
-- FST's input: transition-id
+For each utterance/sentence, it will generate an *transition-id-to-word fst*.
+- FST's input: transition-id seqence
 - FST's output: the utterance
 All the output FSTs will be archived into one file. The utterance-id will be used as the key to index these FSTs. In practice, the archived file will be gzip'ed.
 
@@ -320,13 +330,13 @@ After converting the words into integers, it will be:
 - 1, generate a *word-linear-acceptor fst*:
   - <img src="./word_linear_acceptor.svg" height="40">
 
-- 2, compose the *input lexicon fst* and the *word-linear-acceptor fst* to generate a *phone-to-utterance fst*
+- 2, compose the *input lexicon fst* and the *word-linear-acceptor fst* to generate a *phone-to-word fst*
   - <img src="./phone2word.svg" height="50">
 
 - 3, generate a kind of *context-to-phone fst*, please refer to ContextFst in `/kaldi/src/fstext/context-fst.h`
 This is for phone-in-context. For monophone traning, the width of the context window is just one. Here the phone-in-context is essentially the phone.
 
-- 4, compose the *context-to-phone fst* and the *phone-to-utterance fst* to generate a *context-to-utterance fst*
+- 4, compose the *context-to-phone fst* and the *phone-to-word fst* to generate a *context-to-word fst*
   - <img src="./ctx2word.0.svg" height="50">
 
 - 5, produce a kind of *transition-id-to-context fst* 
@@ -340,7 +350,7 @@ This is for phone-in-context. For monophone traning, the width of the context wi
   - 5.4, all these small fst's will be combined together by MakeLoopFst(...) in `kaldi/src/fstext/fstext-utils-inl.h`. The following picture is just a combination of 4 phones. In practice, there will be more than 100 phones.
     - <img src="./MakeLoopFstOut.svg" width="300">
 
-- 6, compose *transition-id-to-context fst* and *context-to-utterance fst*, to generate a *transition-id-to-utterance fst*
+- 6, compose *transition-id-to-context fst* and *context-to-word fst*, to generate a *transition-id-to-word fst*
   - raw combination:
     - <img src="./trans2word_0.svg" height="50">
   - DeterminizeStarInLog:
@@ -354,7 +364,7 @@ Equally align transition-ids to the input features for each utterance, `align-eq
 --------------------------
 
 Input
-- a transition-id-to-utterance fst
+- a transition-id-to-word fst
 - the corresponding feature matrix
   - number of rows = *frame_length*
   - number of columns = 39 (feature dimension)
