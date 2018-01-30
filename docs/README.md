@@ -22,7 +22,9 @@ Tutorials
 - `OOV` out of vocabulary
 - `MLE` maximum-likelihood estimates
 - `am` acoustic model
-
+- `objf` objective function
+- `objf impr` objective function improvement
+- `occupation` means how many times
 
 
 Generate the lexicon fst. `utils/make_lexicon_fst.pl`
@@ -129,10 +131,12 @@ Generate HmmTopology. `utils/gen_topo.pl`
 </Topology>
 ```
 
-Generate TransitionModel & ContextDependency for monophone training. `gmm-init-mono.cc`
+Generate TransitionModel+AmDiagGmm & ContextDependency for monophone training. `gmm-init-mono.cc`
 --------------------------
 
-### TransitionModel, `voxforge/s5/exp/mono/0.mdl`
+### TransitionModel+AmDiagGmm, `voxforge/s5/exp/mono/0.mdl`
+
+The TransitionModel and AmDiagGmm are packed in the same binary file, like `0.mdl`.
 
 To get a summary of the information in the initial acoustic model:
 ```
@@ -172,7 +176,7 @@ AE_B AE_E AE_I AE_S
   - start from 1
 - transition-index : the index to the transitions in an hmm-state
 
-We can inspect the monophone model (0.mdl) in text format with command:
+We can inspect the acoustic model (0.mdl) in text format with command:
 
 `$ gmm-copy --binary=false 0.mdl 0.mdl.txt`
 
@@ -376,8 +380,41 @@ Here is the output for `Dcoetzee-20110429-rmx-a0562 WHAT THE FLAMING`
 Accumulate stats for GMM training, `gmm-acc-stats-ali`
 --------------------------
 
+Take the output alignments from the previous step, accumulate the statistic information.
 
+Just like the TransitionModel and AmDiagGmm are packed in the same binary file (e.g. `0.mdl`), 'AccumTransitionModel' and AccumAmDiagGmm are packed in the same binary file (`*.acc`).
 
-Do Maximum Likelihood re-estimation of GMM-based acoustic model, `gmm-est`
+In fact, there is no type 'AccumTransitionModel' in Kaldi. It is simply: `Vector<double>`.
+
+- AccumTransitionModel
+  - for each transition-id, it has an element: double
+  - each element records the total number of the occurance of this transition in the previous alignments.
+- AccumAmDiagGmm
+  - total_frames_ : double
+  - total_log_like_ : double
+    - For an input frame, we get a transition-id, then we get the DiagGmm.
+    - say log_like_ = DiagGmm::LogLikelihoods(input feature vector). Note that, the likelihood/probability is caculated by the Gaussian distribution.
+    - total_log_like_ is the sum of log_like_ of all the input frames
+  - for each pdf, it has an element: AccumDiagGmm
+  - AccumDiagGmm
+    - dim_: just 39
+    - num_comp_: number of Gaussians
+    - occupancy_: double[num_comp_]
+      - For an input frame, we get a transition-id, then we get the DiagGmm.
+      - We compute the 'posteriors' from the frame and the DiagGmm.
+      - We accumulate the reuslt 'posteriors'.
+    - mean_accumulator_: double[num_comp_][dim_]
+      - Accumulate the feature vector of the input frame. **E[X]**
+    - variance_accumulator_: double[num_comp_][dim_]
+      - Accumulate the squared feature vector. **E[X^2]**
+      - PS: it's easy to calculate the variance **E[(X-mu)^2]** from **E[X^2]** and **E[X]**
+
+Do MLE (Maximum Likelihood re-estimation) of GMM-based acoustic model, `gmm-est`
 --------------------------
+
+### Update transition model
+
+TODO: LZ: add a picture here
+
+### Update the Gassian mixture models
 
