@@ -279,6 +279,55 @@
             ]
         }
         ,{
+            "name": "gmm-boost-silence",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/gmmbin/gmm-boost-silence",
+            "args": ["--boost=1.0",
+            "1",
+            "/home/liang/work/speech/learngmm/1.mdl",
+            "/home/liang/work/speech/learngmm/1.boost.mdl"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            //"environment": [],
+            //"externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+        ,{
+            "name": "gmm-align-compiled",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/gmmbin/gmm-align-compiled",
+            "args": ["--transition-scale=1.0", "--acoustic-scale=0.1", "--self-loop-scale=0.1",
+            "--beam=6", "--retry-beam=24",
+            "--careful=false",
+            "/home/liang/work/speech/learngmm/1.mdl",
+            "ark:/home/liang/work/speech/learngmm/compile-train-graphs.1.out",
+            "ark,s,cs:/home/liang/work/speech/learnmfcc/add-deltas-out",
+            "ark,t:/home/liang/work/speech/learngmm/gmm-align-compiled.out"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            //"environment": [],
+            //"externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+        ,{
             "name": "make_lexicon_fst.pl",
             "type": "perl",
             "request": "launch",
