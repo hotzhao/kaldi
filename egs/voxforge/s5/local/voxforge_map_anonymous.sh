@@ -13,10 +13,10 @@ if [ $# -ne 1 ]; then
 fi
 
 data=$1
-data_local=$data/local
+data_local=data/local
 
 if [ ! -d $data ]; then
-  echo "\"$DATA\" is not a directory!"
+  echo "\"$data\" is not a directory!"
   exit 1
 fi
 

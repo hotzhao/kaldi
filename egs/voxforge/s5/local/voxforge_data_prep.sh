@@ -25,7 +25,7 @@ command -v flac >/dev/null 2>&1 ||\
 
 DATA=$1
 
-locdata=$DATA/local
+locdata=data/local
 loctmp=$locdata/tmp
 rm -rf $loctmp >/dev/null 2>&1
 mkdir -p $locdata

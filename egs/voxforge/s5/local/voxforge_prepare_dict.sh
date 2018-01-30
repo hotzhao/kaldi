@@ -3,9 +3,9 @@
 # Copyright 2012 Vassil Panayotov
 # Apache 2.0
 
-locdata=$DATA_ROOT/selected/local
+locdata=data/local
 locdict=$locdata/dict
-cmudict=$DATA_ROOT/../../tools/cmudict
+cmudict=/home/liang/work/speech/tools/cmudict
 
 echo "=== Preparing the dictionary ..."
 

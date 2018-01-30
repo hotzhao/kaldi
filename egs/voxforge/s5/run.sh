@@ -48,6 +48,10 @@ selected=${DATA_ROOT}/selected
 
 # Select a subset of the data to use
 # WARNING: the destination directory will be deleted if it already exists!
+
+# LZ: skip code
+# if false; then
+
 local/voxforge_select.sh --dialect $dialects \
   ${DATA_ROOT}/extracted ${selected} || exit 1
 
@@ -64,11 +68,9 @@ local/voxforge_prepare_lm.sh --order ${lm_order} || exit 1
 # Pronunciations for OOV words are obtained using a pre-trained Sequitur model
 local/voxforge_prepare_dict.sh || exit 1
 
-data=$DATA_ROOT/selected
-
 # Prepare data/lang and data/local/lang directories
 utils/prepare_lang.sh --position-dependent-phones $pos_dep_phones \
-  $data/local/dict '!SIL' $data/local/lang $data/lang || exit 1
+  data/local/dict '!SIL' data/local/lang data/lang || exit 1
 
 # Prepare G.fst and data/{train,test} directories
 local/voxforge_format_data.sh || exit 1
@@ -83,7 +85,7 @@ for x in train test; do
  # for each frame, we generate a feature vector (13 floats)
  # these feature vectors will be compressed via 'copy-feats'
  steps/make_mfcc.sh --cmd "$train_cmd" --nj $njobs \
-   $data/$x exp/make_mfcc/$x $mfccdir || exit 1;
+   data/$x exp/make_mfcc/$x $mfccdir || exit 1;
  # compute cepstral mean and variance for each speaker
  #    mean:             simply accumulate all the features of the speaker
  #    variance:         accumulate all the feature^2 of the speaker
@@ -92,12 +94,12 @@ for x in train test; do
  #    row #0 13:        feature count
  #    row #1 (0..12):   accumulated variance
  #    row #1 13:        unused
- steps/compute_cmvn_stats.sh $data/$x exp/make_mfcc/$x $mfccdir || exit 1;
+ steps/compute_cmvn_stats.sh data/$x exp/make_mfcc/$x $mfccdir || exit 1;
 done
 
 # Train monophone models on a subset of the data
-utils/subset_data_dir.sh $data/train 1000 $data/train.1k  || exit 1;
-steps/train_mono.sh --nj $njobs --cmd "$train_cmd" $data/train.1k $data/lang exp/mono  || exit 1;
+utils/subset_data_dir.sh data/train 1000 data/train.1k  || exit 1;
+steps/train_mono.sh --nj $njobs --cmd "$train_cmd" data/train.1k data/lang exp/mono  || exit 1;
 
 echo "LZ: stop here for debugging"
 exit 1

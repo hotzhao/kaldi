@@ -72,8 +72,6 @@ echo $cmvn_opts  > $dir/cmvn_opts # keep track of options to CMVN.
 #        III. "add-deltas ark:- ark:-" is the second command
 #             Change the feature dimension from 13 to 39.
 #             Please note that, row <-> frame, colume dim == feature dim
-#             TODO: LZ:
-#                 look into the detailed algorithm
 feats="ark,s,cs:apply-cmvn $cmvn_opts --utt2spk=ark:$sdata/JOB/utt2spk scp:$sdata/JOB/cmvn.scp scp:$sdata/JOB/feats.scp ark:- | add-deltas ark:- ark:- |"
 example_feats="`echo $feats | sed s/JOB/1/g`";
 

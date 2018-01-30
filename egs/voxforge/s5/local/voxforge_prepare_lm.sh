@@ -5,7 +5,7 @@
 
 echo "=== Building a language model ..."
 
-locdata=$DATA_ROOT/selected/local
+locdata=data/local
 loctmp=$locdata/tmp
 
 echo "--- Preparing a corpus from test and train transcripts ..."
