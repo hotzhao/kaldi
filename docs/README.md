@@ -36,6 +36,8 @@ Tutorials
 - `HTransducer` = H(HMM), transition-id ==> context-dependent phones
 - `acc` accumulate
 - `sgmm` subspace Gaussian mixture model
+- `cmvn` cepstral mean and variance normalization
+- `EM` expectation-maximization
 
 Generate the lexicon fst. `utils/make_lexicon_fst.pl`
 --------------------------
