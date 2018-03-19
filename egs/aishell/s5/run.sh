@@ -12,13 +12,16 @@
 # Caution: some of the graph creation steps use quite a bit of memory, so you
 # should run this on a machine that has sufficient memory.
 
-data=/export/a05/xna/data
+data=/home/liang/work/speech/corpus/aishell
 data_url=www.openslr.org/resources/33
 
 . ./cmd.sh
 
 local/download_and_untar.sh $data $data_url data_aishell || exit 1;
 local/download_and_untar.sh $data $data_url resource_aishell || exit 1;
+
+echo "lz stop"
+exit 1
 
 # Lexicon Preparation,
 local/aishell_prepare_dict.sh $data/resource_aishell || exit 1;

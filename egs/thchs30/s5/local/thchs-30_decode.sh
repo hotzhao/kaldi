@@ -14,8 +14,8 @@ mono=false
 
 . utils/parse_options.sh || exit 1;
 decoder=$1
-srcdir=$2
-datadir=$3
+srcdir=$2   # exp/mono
+datadir=$3  # data/mfcc
 
 
 if [ $mono = true ];then

@@ -8,7 +8,7 @@ H=`pwd`  #exp home
 n=8      #parallel jobs
 
 #corpus and trans directory
-thchs=/nfs/public/materials/data/thchs30-openslr
+thchs=/home/liang/work/speech/corpus/thchs30
 
 #you can obtain the database by uncommting the following lines
 #[ -d $thchs ] || mkdir -p $thchs  || exit 1
