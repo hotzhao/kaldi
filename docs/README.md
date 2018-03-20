@@ -23,25 +23,30 @@ Tutorials
 - cd kaldi/src/gmmbin && make gmm-init-mono
 
 ### Acronym
-- `asr` automatic speech recognition
 - `<eps>` epsilon, means no symbol here
-- `OOV` out of vocabulary
-- `cmvn` cepstral mean and variance normalization
-- `MLE` maximum-likelihood estimates
-- `am` acoustic model
-- `objf` objective function
-- `objf impr` objective function improvement
-- `occupation` means how many times, reflects the ammount of training data
+- `acc` accumulate
 - `ali` alignment
+- `am` acoustic model
+- `asr` automatic speech recognition
+- `cmvn` cepstral mean and variance normalization
+- `EM` expectation-maximization
+- `fMLLR` feature-space maximum likelihood linear regression 
 - `HCLG` = H o C o L o G
   - H, **H**MM transducer
   - C, **c**ontext-dependency transducer
   - L, pronunciation **l**exicon
   - G, word-level **g**rammar
 - `HTransducer` = H(HMM), transition-id ==> context-dependent phones
-- `acc` accumulate
+- `LDA` linear discriminant analysis
+- `MLE` maximum-likelihood estimates
+- `MLLR` maximum likelihood linear regression
+- `MLLT` maximum likelihood linear transform
+- `objf` objective function
+- `objf impr` objective function improvement
+- `occupation` means how many times, reflects the ammount of training data
+- `OOV` out of vocabulary
+- `SAT` Speaker Adapted Training
 - `sgmm` subspace Gaussian mixture model
-- `EM` expectation-maximization
 
 Generate the lexicon fst. `utils/make_lexicon_fst.pl`
 --------------------------
