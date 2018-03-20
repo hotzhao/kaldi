@@ -78,6 +78,10 @@ GSYMS
 /egs/*/s*/data
 /egs/voxforge/s5/conf/g2p_model
 /egs/voxforge/s5/lz
+/egs/liang/*/data
+/egs/liang/*/pretrained
+/egs/liang/*/rawmfcc
+/egs/liang/*/log
 
 # /tools/
 /tools/ATLAS/
