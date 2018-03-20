@@ -29,7 +29,9 @@ wsj1=/export/corpora5/LDC/LDC94S13B
 
 if [ $stage -le 0 ]; then
   # data preparation.
-  local/wsj_data_prep.sh $wsj0/??-{?,??}.? $wsj1/??-{?,??}.?  || exit 1;
+  # LZ:
+  #     comment out since I don't have wsj corpus
+  # local/wsj_data_prep.sh $wsj0/??-{?,??}.? $wsj1/??-{?,??}.?  || exit 1;
 
   # Sometimes, we have seen WSJ distributions that do not have subdirectories
   # like '11-13.1', but instead have 'doc', 'si_et_05', etc. directly under the
@@ -43,6 +45,9 @@ if [ $stage -le 0 ]; then
   # "nosp" refers to the dictionary before silence probabilities and pronunciation
   # probabilities are added.
   local/wsj_prepare_dict.sh --dict-suffix "_nosp" || exit 1;
+
+  echo "LZ: exit for debug"
+  exit 1;
 
   utils/prepare_lang.sh data/local/dict_nosp \
                         "<SPOKEN_NOISE>" data/local/lang_tmp_nosp data/lang_nosp || exit 1;

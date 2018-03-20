@@ -379,7 +379,9 @@ if "$silprob"; then
 fi
 
 echo "Generating $dir/words.txt..."
-cat $tmpdir/lexiconp.txt | awk '{print $1}' | sort | uniq  | awk '
+# lz: Neither `sort -u` nor `sort | uniq` can handle rare Chinese characters well.
+#cat $tmpdir/lexiconp.txt | awk '{print $1}' | sort | uniq  | awk '
+cat $tmpdir/lexiconp.txt | awk '{print $1}' | sort -u  | awk '
   BEGIN {
     print "<eps> 0";
   }
