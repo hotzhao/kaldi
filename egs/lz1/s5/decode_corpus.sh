@@ -4,8 +4,13 @@
            ## This relates to the queue.
 . ./path.sh
 
-corpus_dir=/home/liang/work/speech/corpus/liang/test2
+corpus_dir=$1
 H=`pwd`  #exp home
+
+echo ""
+echo "##############################"
+echo "Decoding $corpus_dir"
+echo ""
 
 ########################################
 # data prepare
@@ -46,8 +51,7 @@ utils/utt2spk_to_spk2utt.pl data/test/utt2spk > data/test/spk2utt
 #for x in train dev test; do
 for x in test; do
    #make  mfcc
-   #steps/make_mfcc.sh --nj 1 --cmd "$train_cmd" data/$x log/make_mfcc/$x rawmfcc/$x || exit 1;
-   steps/make_mfcc_pitch.sh --nj 1 --cmd "$train_cmd" data/$x log/make_mfcc/$x rawmfcc/$x || exit 1;
+   steps/make_mfcc.sh --nj 1 --cmd "$train_cmd" data/$x log/make_mfcc/$x rawmfcc/$x || exit 1;
    #compute cmvn
    steps/compute_cmvn_stats.sh data/$x log/mfcc_cmvn/$x rawmfcc/$x || exit 1;
 done
@@ -65,3 +69,5 @@ gmm-latgen-faster --max-active=7000 --beam=13.0 --lattice-beam=6.0 \
     --word-symbol-table=pretrained/words.txt pretrained/final.mdl pretrained/HCLG.fst \
     "ark,s,cs:data/test/feats-cmvn.ark" \
     "ark:|gzip -c > data/test/decode.out.lat.gz" 
+
+
