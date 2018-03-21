@@ -107,6 +107,7 @@ Please note:
 - `StdArc` uses `TropicalWeight`
   - TropicalWeight::Zero() = +inf, which is -ln(0)
   - TropicalWeight::One() = 0, which is -ln(1)
+  - please note that, 0.693147180559945 = -ln(0.5), because we set `silprob` to be 0.5 in the above.
 - A transition with Weight::One() is, in essence, "free".
 - The transitions in `lexicon2_fst.txt` with no probability specified, by default, will have probability TropicalWeight::One(), which is 0.
 - Please refer to http://www.openfst.org/twiki/bin/view/FST/FstQuickTour for more detailed info.
@@ -172,16 +173,19 @@ number of gaussians 122
 - non-silence phones
   - phone number: 39
   - each phone has 4 versions (**B**egin, **E**nd, **I**nternal and **S**ingleton) depending on the position of the phone within a word
+    - this is the case for English (`--position-dependent-phones` is true for `prepare_lang.sh`)
+    - for Chinese, `--position-dependent-phones` is normally false
   - each phone-version has 3 HmmState (0, 1, 2)
 - silence phones
   - phone number: 1
   - 5 phone-versions: SIL SIL_B SIL_E SIL_I SIL_S
+    - the case `--position-dependent-phones` is true
   - each phone-version has 5 HmmState (0, 1, 2, 3, 5)
 - number of phones
   - 161 = 39 * 4 + 1 * 5(phone-versions)
 - number of pdfs / number of gaussians
   - 122 = 39 * 3 + 1 * 5(HmmState's)
-  - `shared-phones=$lang/phones/sets.int`, each line contains a list of phones, whose pdfs should be shared. In the following case, all different versions of the original phone share the same pdf.
+  - `shared-phones=$lang/phones/sets.int`, each line contains a list of phones, that shares the same pdf. In the following case, all different versions of the original phone share the same pdf. From **aishell**, we can see that, we don't share pdf among different phones for Chinese.
 ```
 SIL SIL_B SIL_E SIL_I SIL_S
 AA_B AA_E AA_I AA_S
@@ -218,7 +222,7 @@ the log probability of 1026 transitions (ps: -1.386294 = log0.25, -0.2876821 = l
 </LogProbs>
 </TransitionModel>
 <DIMENSION> 39 <NUMPDFS> 122
-<DiagGMM> x 122
+<DiagGMM>
 <GCONSTS>  [ -86.05329 ]
 <WEIGHTS>  [ 1 ]
 <MEANS_INVVARS>  [
@@ -385,7 +389,7 @@ Output
   - it's length equals to *frame_length*
   - so it's aligned with the input feature
 
-Note that, in the input fst, each non-zero input label is a transition-id (ps: transition-id is 1-based). Each transition-id corresponds to one transition, and will consume/generate one frame of feature.
+Note that, in the input fst, each non-zero input label is a transition-id (ps: transition-id is 1-based). Each transition-id corresponds to one transition, and will consume/generate one frame of feature. Say the transition-id corresponds to the state changes from StateA to StateB, the feature is consumed by StateA.
 
 First, we choose a *random path* from the start state to the final state of the input fst. When choosing random path, we exclude self-loops. Along this random path, say there are *num_ilabels* non-zero input labels, which means *num_ilabels* frames will be consumed. In order to consume all the input frames, we still have *frame_length - num_ilabels* left.
 
@@ -416,8 +420,7 @@ In fact, there is no type 'AccumTransitionModel' in Kaldi. It is simply: `Vector
     - For an input frame, we get a transition-id, then we get the DiagGmm.
     - say log_like_ = DiagGmm::LogLikelihoods(input feature vector). Note that, the likelihood/probability is caculated by the Gaussian distribution.
     - total_log_like_ is the sum of log_like_ of all the input frames
-  - for each pdf, it has an element: AccumDiagGmm
-  - AccumDiagGmm
+  - AccumDiagGmm (for each pdf, it has an element: AccumDiagGmm)
     - dim_: just 39
     - num_comp_: number of Gaussians
     - occupancy_: double[num_comp_]

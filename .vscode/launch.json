@@ -12,7 +12,7 @@
             "args": ["--verbose=2",
                 "--config=/home/liang/work/speech/learnmfcc/mfcc.conf",
                 "scp,p:/home/liang/work/speech/learnmfcc/test.scp",
-                "ark:/home/liang/work/speech/learnmfcc/outdgb.ark"],
+                "ark:/home/liang/work/speech/learnmfcc/outdbg.ark"],
 
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

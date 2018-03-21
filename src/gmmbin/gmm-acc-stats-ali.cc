@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     }
 
     Vector<double> transition_accs;
-    trans_model.InitStats(&transition_accs);
+    trans_model.InitStats(&transition_accs); // lz: allocate space for transition_accs
     AccumAmDiagGmm gmm_accs;
     gmm_accs.Init(am_gmm, kGmmAll);
 
