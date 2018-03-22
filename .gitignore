@@ -82,6 +82,7 @@ GSYMS
 /egs/liang/*/pretrained
 /egs/liang/*/rawmfcc
 /egs/liang/*/log
+/egs/cvte
 
 # /tools/
 /tools/ATLAS/
