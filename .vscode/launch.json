@@ -328,6 +328,30 @@
             ]
         }
         ,{
+            "name": "acc-tree-stats",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/acc-tree-stats",
+            "args": ["--ci-phones=1",
+            "/home/liang/work/speech/learngmm/mono/final.mdl",
+            "ark,s,cs:/home/liang/work/speech/learngmm/mono/feat-cmvn-delta.ark",
+            "ark:gunzip -c /home/liang/work/speech/learngmm/mono/ali.1.gz|",
+            "/home/liang/work/speech/learngmm/tri1/1.treeacc"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            //"environment": [],
+            //"externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }        
+        ,{
             "name": "make_lexicon_fst.pl",
             "type": "perl",
             "request": "launch",
