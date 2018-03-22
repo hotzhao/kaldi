@@ -437,8 +437,16 @@ Do MLE (Maximum Likelihood re-estimation) of GMM-based acoustic model, `gmm-est`
 --------------------------
 
 ### Update transition model
-
-TODO: LZ: add a picture here
+The probabilities of the tid are estimated from the occurances of the tid. Please note that, for each transition-state, the sum of the probabilities of the tids are 1.
 
 ### Update the Gassian mixture models
+According to the alignments, it's easy to figure out the features belonging to the DiagGmm. We can then update the mean and variance of the DiagGmm by these features.
+
+gmm-boost-silence
+--------------------------
+The default value in train_mono.sh is one, which means no boost at all. When not equal to 1, it simply scales `DiagGmm::weights_`.
+
+gmm-align-compiled
+--------------------------
+
 

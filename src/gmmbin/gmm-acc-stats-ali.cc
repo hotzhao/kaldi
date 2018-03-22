@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
         for (size_t i = 0; i < alignment.size(); i++) {
           int32 tid = alignment[i],  // transition identifier.
               pdf_id = trans_model.TransitionIdToPdf(tid);
-          trans_model.Accumulate(1.0, tid, &transition_accs);
+          trans_model.Accumulate(1.0, tid, &transition_accs); // accumulate this transition-id
           tot_like_this_file += gmm_accs.AccumulateForGmm(am_gmm, mat.Row(i),
                                                           pdf_id, 1.0);
         }
