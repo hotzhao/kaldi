@@ -340,8 +340,6 @@
 
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            //"environment": [],
-            //"externalConsole": true,
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -351,6 +349,46 @@
                 }
             ]
         }        
+        ,{
+            "name": "cluster-phones",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/cluster-phones",
+            "args": ["/home/liang/work/speech/learngmm/tri1/1.treeacc",
+            "/home/liang/work/speech/kaldi/egs/voxforge/s5/data/lang/phones/sets.int",
+            "/home/liang/work/speech/learngmm/tri1/questions.int"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        } 
+        ,{
+            "name": "compile-questions",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/compile-questions",
+            "args": ["/home/liang/work/speech/learngmm/lang/topo",
+            "/home/liang/work/speech/learngmm/tri1/questions_all.int",
+            "/home/liang/work/speech/learngmm/tri1/questions_all.qst"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        } 
         ,{
             "name": "make_lexicon_fst.pl",
             "type": "perl",
