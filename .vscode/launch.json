@@ -389,6 +389,36 @@
                 }
             ]
         } 
+        // build-tree 
+        //      --verbose=1 --max-leaves=2500 --cluster-thresh=-1 
+        //      exp/tri1/treeacc
+        //      data/lang/phones/roots.int 
+        //      exp/tri1/questions.qst 
+        //      data/lang/topo 
+        //      exp/tri1/tree
+        ,{
+            "name": "build-tree",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/build-tree",
+            "args": ["--verbose=1", "--max-leaves=2500", "--cluster-thresh=-1",
+            "/home/liang/work/speech/learngmm/tri1/1.treeacc",
+            "/home/liang/work/speech/learngmm/lang/phones/roots.int",
+            "/home/liang/work/speech/learngmm/tri1/questions_all.qst",
+            "/home/liang/work/speech/learngmm/lang/topo",
+            "/home/liang/work/speech/learngmm/tri1/tree"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        } 
         ,{
             "name": "make_lexicon_fst.pl",
             "type": "perl",
