@@ -28,9 +28,10 @@ Tutorials
 - `ali` alignment
 - `am` acoustic model
 - `asr` automatic speech recognition
+- `CMLLR` constrained MLLR 
 - `cmvn` cepstral mean and variance normalization
 - `EM` expectation-maximization
-- `fMLLR` feature-space maximum likelihood linear regression 
+- `fMLLR` feature-space MLLR 
 - `HCLG` = H o C o L o G
   - H, **H**MM transducer
   - C, **c**ontext-dependency transducer
@@ -41,6 +42,7 @@ Tutorials
 - `MLE` maximum-likelihood estimates
 - `MLLR` maximum likelihood linear regression
 - `MLLT` maximum likelihood linear transform
+- `MMI` maximum mutual information
 - `objf` objective function
 - `objf impr` objective function improvement
 - `occupation` means how many times, reflects the ammount of training data

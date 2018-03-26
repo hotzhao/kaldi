@@ -389,13 +389,6 @@
                 }
             ]
         } 
-        // build-tree 
-        //      --verbose=1 --max-leaves=2500 --cluster-thresh=-1 
-        //      exp/tri1/treeacc
-        //      data/lang/phones/roots.int 
-        //      exp/tri1/questions.qst 
-        //      data/lang/topo 
-        //      exp/tri1/tree
         ,{
             "name": "build-tree",
             "type": "cppdbg",
@@ -407,6 +400,109 @@
             "/home/liang/work/speech/learngmm/tri1/questions_all.qst",
             "/home/liang/work/speech/learngmm/lang/topo",
             "/home/liang/work/speech/learngmm/tri1/tree"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        } 
+        ,{
+            "name": "ali-to-post",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/ali-to-post",
+            "args": ["ark:gunzip -c /home/liang/work/speech/learnlda/exp/tri2_ali/ali.1.gz|",
+            "ark:/home/liang/work/speech/learnlda/ali-to-post.out"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        } 
+        ,{
+            "name": "weight-silence-post",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/weight-silence-post",
+            "args": ["0.0",
+            "1",
+            "/home/liang/work/speech/learnlda/exp/tri2_ali/final.mdl",
+            "ark:/home/liang/work/speech/learnlda/ali-to-post.out",
+            "ark:/home/liang/work/speech/learnlda/weight-silence-post.out"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        } 
+        ,{
+            "name": "splice-feats",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/featbin/splice-feats",
+            "args": ["ark:/home/liang/work/speech/learnlda/apply-cmvn.out",
+            "ark:/home/liang/work/speech/learnlda/splice-feats.out"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        } 
+        ,{
+            "name": "acc-lda",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/acc-lda",
+            "args": ["--rand-prune=4.0",
+            "/home/liang/work/speech/learnlda/exp/tri2_ali/final.mdl",
+            "ark,s,cs:/home/liang/work/speech/learnlda/splice-feats.out",
+            "ark,s,cs:/home/liang/work/speech/learnlda/weight-silence-post.out",
+            "/home/liang/work/speech/learnlda/exp/tri3a/lda.1.acc"],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        } 
+        ,{
+            "name": "est-lda",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/liang/work/speech/kaldi/src/bin/est-lda",
+            "args": ["--write-full-matrix=/home/liang/work/speech/learnlda/exp/tri3a/full.mat",
+            "--dim=40",
+            "/home/liang/work/speech/learnlda/exp/tri3a/0.mat",
+            "/home/liang/work/speech/learnlda/exp/tri3a/lda.1.acc"],
 
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
