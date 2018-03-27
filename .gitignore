@@ -82,6 +82,8 @@ GSYMS
 /egs/liang/*/pretrained
 /egs/liang/*/rawmfcc
 /egs/liang/*/log
+/egs/liang/*/*/*/decode_test*
+/egs/liang/aishell-tri5a/exp/tri5a/graph
 /egs/cvte
 
 # /tools/
