@@ -8,7 +8,7 @@ text=data/local/train/text
 lexicon=data/local/dict/lexicon.txt
 
 for f in "$text" "$lexicon"; do
-  [ ! -f $x ] && echo "$0: No such file $f" && exit 1;
+  [ ! -f $f ] && echo "$0: No such file $f" && exit 1;
 done
 
 # This script takes no arguments.  It assumes you have already run
