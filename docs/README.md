@@ -32,13 +32,18 @@ Tutorials
 - `cmvn` cepstral mean and variance normalization
 - `EM` expectation-maximization
 - `fMLLR` feature-space MLLR 
+- `GMM supervector` A supervector is composed by stacking the mean vectors from a GMM
 - `HCLG` = H o C o L o G
   - H, **H**MM transducer
   - C, **c**ontext-dependency transducer
   - L, pronunciation **l**exicon
   - G, word-level **g**rammar
 - `HTransducer` = H(HMM), transition-id ==> context-dependent phones
+- `i-vector` (https://www.researchgate.net/post/Can_someone_introduce_me_to_i_vector_approach_for_speaker_recognition)
+- `JFA` joint factor analysis
 - `LDA` linear discriminant analysis
+- `MAP` maximum a posteriori adaptation
+  - also known as: Bayesian adaptation or Bayesian learning
 - `MLE` maximum-likelihood estimates
 - `MLLR` maximum likelihood linear regression
 - `MLLT` maximum likelihood linear transform
@@ -47,8 +52,13 @@ Tutorials
 - `objf impr` objective function improvement
 - `occupation` means how many times, reflects the ammount of training data
 - `OOV` out of vocabulary
+- `PCA` Principal component analysis
 - `SAT` Speaker Adapted Training
 - `sgmm` subspace Gaussian mixture model
+- `SI` speaker independent
+- `SRE` speaker recognition evaluation
+- `SVM` support vector machine
+- `UBM` universal background model
 
 Generate the lexicon fst. `utils/make_lexicon_fst.pl`
 --------------------------
