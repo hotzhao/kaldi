@@ -85,6 +85,7 @@ GSYMS
 /egs/liang/*/*/*/decode_test*
 /egs/liang/aishell-tri5a/exp/tri5a/graph
 /egs/cvte
+/egs/aishell/s5/mfcc*
 
 # /tools/
 /tools/ATLAS/
